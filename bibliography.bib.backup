@@ -1,0 +1,194 @@
+
+    @BOOK{AppliedCryptography,
+      author =       "Bruce Schneier",
+      title =        "Applied Cryptography",
+      publisher =    "John Wiley \& Sons, inc.",
+      year =         "1996",
+      note =         "ISBN~0-471-11709-9",
+    }
+    
+    @BOOK{CryptographyAndNetworkSecurity,
+      author =       "William Stallings",
+      title =        "Cryptography And Network Security",
+      publisher =    "Prentice Hall",
+      year =         "1998",
+      note =         "ISBN~0-13-869017-0",
+    }
+    
+    
+    @BOOK{AnalysisOfEntropyLevels,
+      author =       "Peter Krempa",
+      title =        "Analysis Of Entropy Levels In The Entropy Pool of Random Number Generator",
+      publisher =    "FIT VUT Brno",
+      year =         "2013",
+      note =         "Diploma Thesis",
+    }
+    
+     @MISC{AnalysisOfLinuxRNG,
+      author =       "Zvi Gutterman, Benny Pinkas, Tzachy Reinman",  
+      title =        "Analysis of the linux random number generator",
+      year =         "[quot. dec 2013]",
+      howpublished=  "\url{http://slashdot.org/story/13/11/21/2255209/ask-slashdot-how-reproducible-is-arithmetic-in-the-cloud}",
+   }
+    
+    @MISC{ArithmeticInCloud,
+      author =       "Timothy",  
+      title =        "Ask Slashdot: How Reproducible Is Arithmetic In the Cloud?",
+      year =         "[quot. dec 2013]",
+      howpublished=  "\url{http://slashdot.org/story/13/11/21/2255209/ask-slashdot-how-reproducible-is-arithmetic-in-the-cloud}",
+   }
+   
+   
+   @MISC{UnderstandingRdRandElectronic,
+      author =       "Michael Hamburg",  
+      title =        "Understanding Intel's Ivy Bridge Random Number Generator",
+      publisher =    "Electronic Design",
+      year =         "2012-12-11",
+      howpublished=  "\url{http://electronicdesign.com/learning-resources/understanding-intels-ivy-bridge-random-number-generator}",
+   }
+   @MISC{AnalysisOfDRNG,
+      author =       "Mike Hamburg, Paul Kocher, Mark E. Marson",  
+      title =        "Analysis of Intel's Ivy Bridge Digital Random Number Generator",
+      publisher =    "Cryptography Research, Inc",
+      year =         "2012-12-11",
+      howpublished=  " \url{http://www.cryptography.com/public/pdf/Intel\_TRNG\_Report\_20120312.pdf}",
+   }
+   
+   @MISC{IntelArk,
+      author =       "Intel",  
+      title =        "ARK",
+      publisher =    "Intel",
+      year =         "[quot. 2013-11-15]",
+      howpublished=  "\url{http://ark.intel.com}",
+   }
+
+   @MISC{IntelDRNGGuide,
+      author =       "Intel",  
+      title =        "Intel Digital Random Number Generator (DRNG) Software Implementation Guide",
+      publisher =    "Intel",
+      year =         "[quot. 2013-11-15]",
+      howpublished=  "\url{http://software.intel.com/en-us/articles/intel-digital-random-number-generator-drng-software-implementation-guide}",
+   }
+   
+   @MISC{IntelSWManualVol1,
+      author =       "Intel",  
+      title =        "Intel 64 and IA-32 Architectures Software Developer's Manual, Volume 1: Basic Architecture",
+      publisher =    "Intel",
+      year =         "2013",
+      note =         "Order~Number:~253665-047US",
+      howpublished=  "\url{http://download.intel.com/products/processor/manual/253665.pdf}",
+   }
+   @MISC{IntelRdRandFindAbout,
+      author =       "Gael Hofemeier",  
+      title =        "Find out about Intel's new RdRand Instruction.",
+      publisher =    "Intel",
+      year =         "2011",
+      howpublished=  "\url{http://software.intel.com/en-us/blogs/2011/06/22/find-out-about-intels-new-rdrand-instruction}",
+   }
+   
+   @MISC{IntelDRNGAnalysis,
+      author =       "Eliana Penzner",  
+      title =        "Digital Random Number Generator (DRNG) Analysis Project",
+      publisher =    "Intel",
+      year =         "2013",
+      howpublished=  "\url{http://software.intel.com/en-us/articles/digital-random-number-generator-drng-analysis-project}",
+   }
+   
+   
+   @MISC{KernelRdRand,
+      author =       "H. Peter Anvin",  
+      title =        "Direct support for the x86 RDRAND instruction ",
+      year =         "2011-6-29",
+      howpublished=  "\url{http://lwn.net/Articles/453651/}",
+   }
+   @MISC{TheodoreTsoNSA,
+      author =       "Theodore Ts'o",  
+      title =        "Theodore Ts'o's post on Google plus after relevations of extend of NSA spying",
+      year =         "2013-9-5",
+      howpublished=  "\url{https://plus.google.com/+TheodoreTso/posts/SDcoemc9V3J}",
+   }
+   
+   @MISC{StackoverflowRDRANDCharacteristics,
+      author =       "David Johnston",  
+      title =        "What are the exhaustion characteristics of RDRAND on Ivy Bridge?",
+      year =         "[quot. 2013-11-16]",
+      howpublished=  "\url{http://stackoverflow.com/a/14443763}",
+   }
+
+   @MISC{GuardianNSA,
+      author =       "Glenn Greenwald",  
+      publisher =    "The Guardian",
+      title =        "NSA collecting phone records of millions of Verizon customers daily",
+      year =         "2013-6-6",
+      howpublished=  "\url{http://www.theguardian.com/world/2013/jun/06/nsa-phone-records-verizon-court-order}",
+   }
+   @MISC{DailymailNSA,
+      author =       "Reuters reporter",  
+      publisher =    "Daily Mail",
+      title =        "U.S. monitored German Chancellor Angela Merkel's phone since 2002",
+      year =         "2013-10-26",
+      howpublished=  "\url{http://www.dailymail.co.uk/news/article-2477593/U-S-monitored-German-Chancellor-Angela-Merkels-phone-2002.html}",
+   }
+   @MISC{PetitionRdRand,
+      author =       "Kyle Condon",  
+      title =        "[Petition] Linus Torvalds: Remove RdRand from /dev/random",
+      year =         "2013",
+      howpublished=  "\url{http://www.change.org/en-GB/petitions/linus-torvalds-remove-rdrand-from-dev-random-4}",
+   }
+   @MISC{PetitionRdRandSlashdot,
+      author =       "hypnosec",  
+      title =        "Linus Responds To RdRand Petition With Scorn",
+      year =         "2013",
+      howpublished=  "\url{http://slashdot.org/story/13/09/10/1311247/linus-responds-to-rdrand-petition-with-scorn}",
+   }
+   @MISC{GNULGPL,
+      author =       "GNU",  
+      title =        "GNU LGPL 2.1",
+      year =         "February 1999 ",
+      howpublished=  "\url{http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html}",
+   }
+   
+   @MISC{OpenSSLAPI,
+      author =       "OpenSSL",  
+      title =        "OpenSSL - rand(3)",
+      year =         "[quoted 2013]",
+      howpublished=  "\url{http://www.openssl.org/docs/crypto/rand.html}",
+   }
+   @MISC{CSPRNG,
+      author =       "Jiří Hladký",  
+      title =        "CSPRNG",
+      year =         "[quoted 2013]",
+      howpublished=  "\url{http://code.google.com/p/csrng/}",
+   }
+   
+   @MISC{BehindRdRand,
+      author =       "Greg Taylor, George Cox",  
+      title =        "Behind Intel’s New Random-Number Generator",
+      year =         "[quoted 2014]",
+      howpublished=  "\url{http://spectrum.ieee.org/computing/hardware/behind-intels-new-randomnumber-generator}",
+   }
+   @MISC{RHEL7Just64bits,
+      author =       "Red Hat",  
+      title =        "Are 32-bit applications supported in RHEL 7?",
+      year =         "[quoted 2014]",
+      howpublished=  "\url{https://access.redhat.com/site/solutions/509373}",
+   }
+   @MISC{Entrophy,
+      author =       "Merriam-Webster dictionary",  
+      title =        "Entropy",
+      year =         "[quoted 2014]",
+      howpublished=  "\url{http://www.merriam-webster.com/dictionary/entropy}",
+   }
+   @MISC{AMathematicalTheoryOfCommunication,
+      author =       "C. E. Shannon",  
+      title =        "A Mathematical Theory of Communication",
+      year =         "1948",
+      howpublished=  "\url{http://www3.alcatel-lucent.com/bstj/vol27-1948/articles/bstj27-3-379.pdf}",
+   }
+   
+   
+   
+   
+   
+   
+   
