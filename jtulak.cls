@@ -15,6 +15,8 @@
 \newif\ifPrint \let\ifPrint\iffalse
 \newif\ifNotPrint \let\ifNotPrint\iftrue
 %\newif\ifWis   \let\ifWis\iftrue
+\newif\ifzadani   \let\ifzadani\iffalse
+\newif\iftwoside   \let\iftwoside\iffalse
 
 
 %-----------------------------------------------------------------------------
@@ -24,14 +26,24 @@
 \DeclareOption{czech}{\let\ifczech\iftrue}
 \DeclareOption{cover}{\let\ifcover\iftrue}
 \DeclareOption{print}{\let\ifPrint\iftrue \let\ifNotPrint\iffalse}
+\DeclareOption{zadani}{\let\ifzadani\iftrue}
+\DeclareOption{twoside}{\let\iftwoside\iftrue}
 
 \DeclareOption*{}
 \ProcessOptions\relax
 %Jako vychozi pouzijeme tridu REPORT
-\ifx\pdfoutput\undefined % nejedeme pod pdftexem
-   \LoadClass[a4paper,twoside,onecolumn,11pt]{report}
+\iftwoside
+	\ifx\pdfoutput\undefined % nejedeme pod pdftexem
+	\LoadClass[a4paper,twoside,onecolumn,11pt]{report}
+	\else
+	\LoadClass[pdftex,a4paper,twoside,onecolumn,11pt]{report}
+	\fi
 \else
-   \LoadClass[pdftex,a4paper,twoside,onecolumn,11pt]{report}
+	\ifx\pdfoutput\undefined % nejedeme pod pdftexem
+	\LoadClass[a4paper,twoside,onecolumn,11pt]{report}
+	\else
+	\LoadClass[pdftex,a4paper,twoside,onecolumn,11pt]{report}
+	\fi
 \fi
 
 
@@ -50,6 +62,7 @@
 \usepackage{lastpage}
 \usepackage{fancyhdr}
 \usepackage{nameref}
+\usepackage[]{opensans}
 \usepackage[usenames,dvipsnames]{color}
 
 \usepackage[hmarginratio=1:1]{geometry}
@@ -375,15 +388,29 @@ This publication is protected by copyright and its usage without permission of i
  \ifEqString{#1}{en}{#2}{\@tkeywords@EN}%
 }
 
+%Rozsireny abstrakt / Extended abstract
+%\newcommand{\extendedabstract}[1]{%
+% \def\@textendedabstract{#1}%
+%}
+
 \newlength{\mkspc}
 \setlength{\mkspc}{2pt}
 
 \def\setfontsize#1{\renewcommand{\baselinestretch}{1.5}\fontsize{#1}{\f@baselineskip}\selectfont}
 %text
 \newcommand{\mktxt}[2]{\vbox{\setfontsize{#1}\noindent#2}\vspace\mkspc}
+%text pro titulní list / text for title page
+\newcommand{\mktxtt}[2]{\vbox{\setfontsize{#1}\fosfamily\bfseries\noindent#2}\vspace\mkspc}
+%text pro desky / text for cover
+\newcommand{\mktxtc}[2]{\vbox{\setfontsize{#1}\ifCOPEN\fosfamily\fi\ifCBOPEN\fosfamily\bfseries\fi\noindent#2}\vspace\mkspc}
+%všechna velká / uppercase
+\newcommand{\mkuctxt}[2]{\vbox{\setfontsize{#1}\noindent\MakeUppercase{#2}}\vspace\mkspc}
+\newcommand{\mkuctxtt}[2]{\vbox{\setfontsize{#1}\fosfamily\bfseries\noindent\MakeUppercase{#2}}\vspace\mkspc}
+\newcommand{\mkuctxtc}[2]{\vbox{\setfontsize{#1}\ifCOPEN\fosfamily\fi\ifCBOPEN\fosfamily\bfseries\fi\noindent\MakeUppercase{#2}}\vspace\mkspc}
 %bold
 \newcommand{\mktxt@b}[2]{\vbox{\setfontsize{#1}\noindent\bf#2}\vspace\mkspc}
-\newcommand{\mkuctxt}[2]{\vbox{\setfontsize{#1}\noindent\MakeUppercase{#2}}\vspace\mkspc}
+%bold pro titulní list / bold for title page
+\newcommand{\mktxtt@b}[2]{\vbox{\setfontsize{#1}\fosfamily\bfseries\noindent\bf#2}\vspace\mkspc}
 %-----------------------------------------------------------------------------
 %Desky \makecover
 %-----------------------------------------------------------------------------
@@ -512,57 +539,100 @@ This publication is protected by copyright and its usage without permission of i
 \renewcommand\maketitle{%
 \ifcover\makecover\fi%
 \thispagestyle{empty}\null%
+\iftwoside
+  \pagestyle{empty}\null%
+\fi
 %=====================================================
-\fontfamily{phv}\selectfont%
-\newsavebox{\@obrlogo}\newsavebox{\@rtext}\newlength{\@vyskartext}\newlength{\@vyskaobr}%
+\fontfamily{qhv}\selectfont%
+%\newsavebox{\@obrlogo}\newsavebox{\@rtext}\newlength{\@vyskartext}\newlength{\@vyskaobr}%
+\newsavebox{\@obrlogo}\newsavebox{\@rtext}\newlength{\@vyskartext}\newlength{\@sirkartext}\newlength{\@vyskaobr}\newlength{\@sirkaobr}%
 
-\savebox{\@obrlogo}{\includegraphics[width=3.5cm,keepaspectratio]{fig/vut-zp2}}%logo VUT
-\savebox{\@rtext}{\vbox{\mkuctxt{18}{\@vut@CS}\mkuctxt{11}{\@vut@EN}}}%text VUT
-\settoheight{\@vyskaobr}{\makebox{\usebox{\@obrlogo}}}% vyska loga
-\settoheight{\@vyskartext}{\makebox{\usebox{\@rtext}}}% vyska textu
-\addtolength{\@vyskaobr}{-\@vyskartext}%odecteme od vysky loga vysku textu
-\noindent\usebox{\@obrlogo}\raisebox{\@vyskaobr}{\hspace{10pt}\usebox{\@rtext}}%zvedneme box s textem
+
+\ifPrint
+  \savebox{\@obrlogo}{\hspace*{-0.6cm}\includegraphics[width=4.1cm,keepaspectratio,trim={1.2cm 1.2cm 1.2cm 1.2cm},clip]{template-fig/VUT_symbol_cernobile_CZ}}%symbol VUT
+\else
+  \savebox{\@obrlogo}{\hspace*{-0.6cm}\includegraphics[width=4.1cm,keepaspectratio,trim={1.2cm 1.2cm 1.2cm 1.2cm},clip]{template-fig/VUT_symbol_barevne_CMYK_CZ}}%symbol VUT
+\fi
+
+\savebox{\@rtext}{\vbox{\mkuctxt{18}{\ifczech\@vut@CS\else\@vut@EN\fi}\mkuctxt{11}{\ifczech\@vut@EN\else\@vut@CS\fi}}}%text VUT
+\settoheight{\@vyskaobr}{\makebox{\usebox{\@obrlogo}}}% vyska loga / logo height
+\settowidth{\@sirkaobr}{\makebox{\usebox{\@obrlogo}}}% vyska loga
+\settoheight{\@vyskartext}{\makebox{\usebox{\@rtext}}}% vyska textu / text height
+\settowidth{\@sirkartext}{\makebox{\usebox{\@rtext}}}% sirka textu / text width
+\addtolength{\@vyskaobr}{-\@vyskartext}%odecteme od vysky loga vysku textu / we will subtract text height from logo height
+\addtolength{\@sirkartext}{-\@sirkaobr}\addtolength{\@sirkartext}{-10pt}%sirka textu na radku s obrazkem a odsazenim / text width on row with picture and indentation
+
+%\newtoggle{gray_used}
+%\togglefalse{gray_used}
+
+
+\usebox{\@obrlogo}
+  
+\vspace{10mm}
+  
+\mkuctxtt{18}{\ifczech\@vut@CS\else\@vut@EN\fi}
+\mkuctxtt{11}{\ifczech\@vut@EN\else\@vut@CS\fi}
 
 \vspace{5mm}
 
-\savebox{\@obrlogo}{\includegraphics[width=3.5cm,keepaspectratio]{fig/fit-zp2}}%logo FIT
-\savebox{\@rtext}{%text FIT, USTAV
-\vbox{\mkuctxt{14}{\@fit@CS}%\mkuctxt{14}{\@departmentname@CS}
-%\vspace{3mm}
-\mkuctxt{11}{\@fit@EN}%\mkuctxt{11}{\@departmentname@EN}
-}}%
-\settoheight{\@vyskaobr}{\makebox{\usebox{\@obrlogo}}}% vyska loga
-\settoheight{\@vyskartext}{\makebox{\usebox{\@rtext}}}% vyska textu
-\addtolength{\@vyskaobr}{-\@vyskartext}%odecteme od vysky loga vysku textu
-\noindent\usebox{\@obrlogo}\raisebox{\@vyskaobr}{\hspace{10pt}\usebox{\@rtext}}%zvedneme box s textem
+\mkuctxtt{14}{\ifczech\@fit@CS\else\@fit@EN\fi}
+\mkuctxtt{11}{\ifczech\@fit@EN\else\@fit@CS\fi}
+
+
+\vspace{5mm}
+
+\mkuctxtt{14}{\ifczech\@departmentname@CS\else\@departmentname@EN\fi}
+\mkuctxtt{11}{\ifczech\@departmentname@EN\else\@departmentname@CS\fi}
+
+
+\vspace{5mm}
 
 \vfill
 
-\mkuctxt{18}{\@title@CS}
-\mkuctxt{10}{\@title@EN}
+\mkuctxtt{18}{\ifczech\@title@CS\else\@title@EN\fi}
+\mkuctxtt{10}{\ifczech\@title@EN\else\@title@CS\fi}
 
 \vfill
 
-%\mkuctxt{14}{\@projecttype@CS}
-%\mkuctxt{10}{\@projecttype@EN}
+\mkuctxtt{14}{\ifczech\@projecttype@CS\else\@projecttype@EN\fi}
+\mkuctxtt{10}{\ifczech\@projecttype@EN\else\@projecttype@CS\fi}
 
-%\vspace{5mm}
+\vspace{5mm}
 
-\mktxt{14}{\MakeUppercase{\@author@EN} \hfill \get@author}
-%\mktxt{14}{\MakeUppercase{\@author@CS} \hfill \get@author}
-%\mkuctxt{10}{\@author@EN}
+\mktxtt{14}{\MakeUppercase{\ifczech\@author@CS\else\@author@EN\fi} \hfill \get@author}
+\mkuctxtt{10}{\ifczech\@author@EN\else\@author@CS\fi}
 
-%\vspace{5mm}
 
-%\mktxt{14}{\MakeUppercase{\@supervisor@CS} \hfill \get@supervisor}
-%\mkuctxt{10}{\@supervisor@EN}
+\vspace{5mm}
+
+\mktxtt{14}{\MakeUppercase{\ifczech\@supervisor@CS\else\@supervisor@EN\fi} \hfill \get@supervisor}
+\mkuctxtt{10}{\ifczech\@supervisor@EN\else\@supervisor@CS\fi}
 
 \vspace{10mm}
 
-%\mktxt{11}{BRNO \@year}
-\mktxt{11}{BRNO \hfill \MakeUppercase{\@date}}
+\mktxtt{11}{BRNO \@year}
 
-\newpage\fontfamily{\familydefault}\selectfont%
+\iftwoside
+  \newgeometry{left=3.46cm, text={15.2cm,23.0cm}, top=2.96cm}
+\fi
+
+%zadani / assignment
+\ifzadani\includepdf[pages=-,offset=0.6cm -1.7cm]{zadani.pdf}\fi
+%\ifzadani\includepdf[pages=-,offset=0.6cm -1.7cm]{assignment.pdf}\fi
+
+\iftwoside
+  \cleardoublepage
+  \pagestyle{plain}
+\else
+  \newpage
+\fi
+\fontfamily{\familydefault}\selectfont%
+%=================================================================================
+\makeabstract\makedeclaration
+\clearpage
+\setcounter{tocdepth}{2}\setcounter{page}{1}
+}
+
 %=================================================================================
 %\makeabstract
 %\ifczech\else
@@ -570,8 +640,8 @@ This publication is protected by copyright and its usage without permission of i
 %\fi % ifczech
 %\makedeclaration
 %\clearpage
-\setcounter{tocdepth}{2}\setcounter{page}{1}
-}
+%\setcounter{tocdepth}{2}\setcounter{page}{1}
+%}
 
 %-----------------------------------------------------------------------------
 \def\uv#1{\iflanguage{english}{``#1''}%
