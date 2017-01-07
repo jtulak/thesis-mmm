@@ -40,9 +40,9 @@
 	\fi
 \else
 	\ifx\pdfoutput\undefined % nejedeme pod pdftexem
-	\LoadClass[a4paper,twoside,onecolumn,11pt]{report}
+	\LoadClass[a4paper,oneside,onecolumn,11pt]{report}
 	\else
-	\LoadClass[pdftex,a4paper,twoside,onecolumn,11pt]{report}
+	\LoadClass[pdftex,a4paper,onside,onecolumn,11pt]{report}
 	\fi
 \fi
 
