@@ -5,8 +5,12 @@ When I joined the XFS team and began with the refactoring in 2015~\cite{myFirstP
 
 Once this change was merged and provided a stable point so I didn't had to keep so much code in my own local repository up to date with upstream, I began to work on the second set of changes. I submitted a RFC of these changes in December 2016~\cite{secondSetRFC} and as of now, I'm awaiting a review. Such a big and complex changes are usually reviewed only by the maintainer who changed in late December -- Eric Sandeen took this position instead of David Chinner. This probably caused some delay.
 
+The idea of changes described in this work is to create a table which holds values like minimum/maximum, default values, conflicts and others. And instead of ad-hoc conditions and operations, there will be just one global structure, well documented and easily readable and extendable. This structure should hold also the user-entered values and limit code and variables duplication as much as possible.
+
 \section{First patchset}\label{chap:refactoring:first}
+The first patchset implemented the core parts from the desire state. The implementation of the basic table made the {\tt mkfs\_xfs.c} file more readable, even if it was possible to remove only basic checks. It also brought a much more strict input validation, so few of the existing tests in xfstests had to be updated and a new test was created, with the goal to watch only for input validation, whether {\tt mkfs.xfs} correctly accepts or refuses any given combination of options and values.
 
 
-
+\section{Second patchset}\label{chap:refactoring:second}
+The second part of my changes is focused mostly on conflicts detection and allows for almost all checks to be removed from the code as ad-hoc solutions, as the new structures and functions take care of them automatically. Any programmer making a change just has to correctly specify values in a {\tt struct opt\_params}, write in a list of conflicting options, and the validation of the new option is guaranteed to work correctly and seamlessly.
 
