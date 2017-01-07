@@ -38,7 +38,7 @@ desky:
 	pdflatex desky
 
 normostrany:
-	echo "scale=2; `detex -n $(CO)-[01]*.tex | wc -c`/1800;" | bc
+	echo "scale=2; `detex -n content/*.tex | wc -c`/1800;" | bc
 
 clean:
 	rm -f *.dvi *.log $(CO).blg $(CO).bbl $(CO).toc *.aux $(CO).out $(CO).lof
