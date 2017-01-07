@@ -1,5 +1,5 @@
 
-\chapter{XFS filesystem}
+\chapter{XFS filesystem} \label{chap:xfs}
 
 XFS is a journaling filesystem created by SGI in 1993. The new filesystem, intended as a powerful replacement of EFS with expectation of growing amount of data in the future was first released in IRIX 5.3. Linux port began in 1999 and since 2002 is XFS acessible in the mainline Linux Kernel~\cite[Chap. 1.2, 1.3]{xfsHistory}.
 
@@ -8,7 +8,8 @@ XFS as a whole is separated into three main projects: First there is the XFS fil
 Except the xfstests test suite, xfsprogs also uses an automatical static analysis from Coverity~\cite{CoverityXfsprogs}. However, to see detailed information and defects there, one must be approved by existing members of the project.
 
 
-\section{Architecture overview}
+\section{Architecture overview}\label{chap:xfs:overview}
+
 When a XFS partition is formated, up to three areas are created on the disk: Data section is always present. An optional realtime section is ommited by default. Log section can has to exist always, but can be placed on a different device. The data part is then in fact split into multiple de facto independent filesystems called Allocation Groups, that handle space allocation and allows for higher parallelism, as most operation can be done on each Allocation Group independetly on the others. The log section can be also internal to each of the Allocation Groups.
 
 As each Allocation Group is a de facto standalone filesystem, each contains the superblock and block and inode allocations.
@@ -16,7 +17,7 @@ As each Allocation Group is a de facto standalone filesystem, each contains the 
 Realtime section is dedicated for files with a realtime attribute bit set, and operations with these files should have predictable latencies~\cite{xfsRealtime}. Log section is used to recover from situations like power failure on the next mount~\cite{xfsStructure,xfsman}.
 
 
-\section{mkfs.xfs}
+\section{mkfs.xfs}\label{chap:xfs:mkfs}
 Now I describe in a greater detail the mkfs.xfs program itself, located in file {\tt mkfs/mkfs\_xfs.c}. This tool creates a new XFS filesystem with given properties. It is, as is usuall for core Unix utilities, non-interactive program which accepts multiple arguments when called and prints out the properties of the newly created filesystem if successful, or prints an error and usage help when an error occurs.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Synopsis of mkfs.xfs utility~\cite{mkfs.xfsMan}.}]
