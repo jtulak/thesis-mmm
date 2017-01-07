@@ -66,7 +66,7 @@
 \projectinfo{
   %Prace
   project=DP,            %typ prace BP/SP/DP/DR
-  year=2016,             %rok
+  year=2017,             %rok
   date=\today,           %datum odevzdani
   %Nazev prace
   title.cs={Refaktoring a verifikace kódu mkfs xfs},  %nazev prace v cestine
@@ -102,7 +102,9 @@
 	used sources are stated and correctly noted as citations.
   },
   %Podekovani (nepovinne)
-  acknowledgment={}, % nepovinne
+  acknowledgment={I want to thanks to my manager Steven Whitehouse, my
+  colleagues at Red Hat, to David Chinner, maintainer of XFS, and to
+  everyone in XFS community.}, % nepovinne
   % Rozsireny abstrakt v ceskem jazyce
   abstractext.cs={
 	Rozšířený abstrakt v češtině, protože to prý práce v AJ
@@ -215,15 +217,15 @@
 
   % Pouzita literatura
   % ----------------------------------------------
-%\ifczech
-%  \bibliographystyle{czechiso}
-%\else 
-%  \bibliographystyle{plain}
-%%  \bibliographystyle{alpha}
-%\fi
-%  \begin{flushleft}
-%  \bibliography{bibliography} 
-%  \end{flushleft}
+\ifczech
+  \bibliographystyle{czechiso}
+\else 
+  \bibliographystyle{plain}
+%  \bibliographystyle{alpha}
+\fi
+  \begin{flushleft}
+  \bibliography{bibliography} 
+  \end{flushleft}
 %  \appendix
   
 \end{document}

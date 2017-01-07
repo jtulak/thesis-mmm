@@ -2,6 +2,7 @@
 # (c) 2008 Michal Bidlo
 # E-mail: bidlom AT fit vutbr cz
 # Changes: Jan Tulak (jan@tulak.me)
+#          dytrych AT fit vutbr cz
 #===========================================
 CO=proj
 
@@ -19,14 +20,14 @@ $(CO).ps: $(CO).dvi
 $(CO).pdf: clean
 	pdflatex $(CO)
 	pdflatex $(CO)
-#	bibtex $(CO)
+	bibtex $(CO)
 	pdflatex $(CO)
 	pdflatex $(CO)
 
 $(CO).dvi: $(CO).tex 
 	#$(CO).bib
 	latex $(CO)
-#	bibtex $(CO)
+	#bibtex $(CO)
 	latex $(CO)
 	latex $(CO)
 
@@ -35,6 +36,9 @@ desky:
 #	dvips desky
 #	dvipdf desky
 	pdflatex desky
+
+normostrany:
+	echo "scale=2; `detex -n $(CO)-[01]*.tex | wc -c`/1800;" | bc
 
 clean:
 	rm -f *.dvi *.log $(CO).blg $(CO).bbl $(CO).toc *.aux $(CO).out $(CO).lof
