@@ -9,10 +9,18 @@ In such a projects, new functionality is added to the existing code with minimal
 
 The result is increasingly more difficult to maintain and test, and as a single functionality can be spread over many portions of the project, any change requires more and more attention and time.
 
-XFSprogs, a package of tools for XFS filesystem, is such a project. While the filesystem itself is getting some strict eye from the Linux kernel community nowdays, the tools like mkfs.xfs\footnote{Formats a partition as XFS.}, fsck\footnote{Checks and repairs errors in an existing XFS filesystem.} and others are not so publicly exposed and gets a lot less attention. From my experience with working on this project, it happens that only one or two persons other than the author of a patch read it, and miss some subtle side effect the change has. Sometimes, the large set of tests XFS maintains captures this bug, sometimes it doesn't and it is noticed much later.
+XFSprogs, a package of tools for XFS filesystem, is such a project. While the filesystem itself is getting some strict eye from the Linux kernel community nowdays, the tools like {\tt mkfs.xfs}\footnote{Formats a partition as XFS.}, {\tt fsck.xfs}\footnote{Checks and repairs errors in an existing XFS filesystem.} and others are not so publicly exposed and gets a lot less attention. From my experience with working on this project, it happens that only one or two persons other than the author of a patch read it, and miss some subtle side effect the change has. Sometimes, the large set of tests XFS maintains captures this bug, sometimes it doesn't and it is noticed much later.
 
-Some parts of this code are more than 20 years old (see chapter 1 for more detailed history of XFS) and in the need of intensive cleaning. The tests suite (project xfstests) maintains hundreds of more or less complex tests, but these are limited in what they can detect as they usually work in this way: make a filesystem, then test that, so many errors in mkfs.xfs are difficult to capture or notice. XFS also uses an automatic static analysis from Coverity, which is usefull, but the project has no good data on reliability of this analysis.
+Some parts of this code are more than 20 years old (see chapter 1 for more detailed history of XFS) and in the need of intensive cleaning. The tests suite (project xfstests) maintains hundreds of more or less complex tests, but these are limited in what they can detect as they usually work in this way: make a filesystem, then test that, so many errors in {\tt mkfs.xfs} are difficult to capture or notice. XFS also uses an automatic static analysis from Coverity, which is usefull, but the project has no good data on reliability of this analysis.
 
 As XFS is considered a matured filesystem and Red Hat Enterprise Linux uses it as the default filesystem since version 7~\cite{RHEL7XFS}, I felt that this situation needs some correcting. With the approval of David Chinner, the maintainer of XFS, I began the refactoring of mkfs.xfs, which was most in due. The goal was to repay the technical debt accumulated over the years and then verify how effective the currently used tests and analysis are on at least a part of the code. At the same time, this work can be also seen as a review of how well can various analysis and verification methods do on a real, in production used code.
+
+The refactoring was done in two parts. One set of changes was merged into upstream in June 2016 (xfsprogs 4.7), the other set is, at the time of writing, still waiting for a review:
+\begin{itemize}
+\item Before beginning of refactoring -- xfsprogs 4.6.
+\item After mergin the first part -- xfsprogs 4.7.
+\item Before mergin the second part -- xfsprogs 4.9 at the time of writing.
+\item After applying the second part -- not yet merged, changes only in a local repository.
+\end{itemize}
 
 

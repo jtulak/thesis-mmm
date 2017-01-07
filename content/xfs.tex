@@ -3,11 +3,33 @@
 
 XFS is a journaling filesystem created by SGI in 1993. The new filesystem, intended as a powerful replacement of EFS with expectation of growing amount of data in the future was first released in IRIX 5.3. Linux port began in 1999 and since 2002 is XFS acessible in the mainline Linux Kernel~\cite[Chap. 1.2, 1.3]{xfsHistory}.
 
+XFS as a whole is separated into three main projects: First there is the XFS filesystem itself, in the form of kernel module. Then a set of tools in a package called xfsprogs is tightly connected with XFS filesystem and contains programs useful or necessary for creation and manipulation of the filesystem. Among the tools included are {\tt mkfs.xfs}, on which this thesis is focused, but also other tools: {\tt fsck.xfs}, {\tt xfs\_io}, {\tt xfs\_growfs}, et cetera. And finally there are xfstests, which is a test suite containing hundreds of shell scripts that verifying the behaviour of entire XFS chain (from mkfs to the kernel code). This project is also partially used by other filesystems. There are among others tests for ext4, overlay fs and btrfs.
+
+Except the xfstests test suite, xfsprogs also uses an automatical static analysis from Coverity~\cite{CoverityXfsprogs}. However, to see detailed information and defects there, one must be approved by existing members of the project.
 
 
 \section{Architecture overview}
-Some stuff about insides of XFS.
+When a XFS partition is formated, up to three areas are created on the disk: Data section is always present. An optional realtime section is ommited by default. Log section can has to exist always, but can be placed on a different device. The data part is then in fact split into multiple de facto independent filesystems called Allocation Groups, that handle space allocation and allows for higher parallelism, as most operation can be done on each Allocation Group independetly on the others. The log section can be also internal to each of the Allocation Groups.
 
-\section{The tools: xfsprogs}
-Stuff about xfsprogs, focused on mkfs.
+As each Allocation Group is a de facto standalone filesystem, each contains the superblock and block and inode allocations.
+
+Realtime section is dedicated for files with a realtime attribute bit set, and operations with these files should have predictable latencies~\cite{xfsRealtime}. Log section is used to recover from situations like power failure on the next mount~\cite{xfsStructure,xfsman}.
+
+
+\section{mkfs.xfs}
+Now I describe in a greater detail the mkfs.xfs program itself. This tool creates a new XFS filesystem with given properties. It is, as is usuall for core Unix utilities, non-interactive program which accepts multiple arguments when called and prints out the properties of the newly created filesystem if successful, or prints an error and usage help when an error occurs.
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Synopsis of mkfs.xfs utility~\cite{mkfs.xfsMan}.}]
+mkfs.xfs [ -b block_size ] [ -d data_section_options ] [ -f ]
+         [ -i inode_options ] [ -l log_section_options ] [ -n naming_options ]
+         [ -p protofile ] [ -q ] [ -r realtime_section_options ]
+         [ -s sector_size ] [ -L label ] [ -N ] [ -K ] device
+\end{lstlisting}
+
+An example of such usage is {\tt mkfs.xfs -f /dev/sda1}. This simple example creates a XFS filesystem on device {\tt /dev/sda1} even if an existing filesystem existed there -- thus the {\tt -f} (as force) flag. For the whole description of mkfs.xfs usage it is better to refer to mkfs.xfs manual page. What is important to note here is that parsing the input arguments and computing inner values based on these inputs makes most of the cca 3.500\footnote{Before the merge of the last part of my changes. With these changes, mkfs has over 4.000 lines.} lines of code.
+
+
+
+
+
 
