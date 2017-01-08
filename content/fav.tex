@@ -36,7 +36,14 @@ Tools using it: Lint~\cite{KrenaVojnarOverview} (and it's followers), cppcheck\f
 
 {\em Error patterns} detection is a rather wide array of different techniques and methods with a common goal: To detect more or less frequent type of errors. The great advantage of this class of methods is that they usually don't require any deeper knowledge, are fully automated and can very fast. Their disadvantages are that they are limited to a very specific kind of errors\footnote{Basically, every error pattern needs is own filter and only some kinds of error patterns are generic enough to be shipped within the tool. Consider a support for usage of a library. It makes sense to watch for patterns in usage of {\tt stdlib.h}, but how it should know patterns in a custom library? And even if the specific library is publicly available, including everything is impossible. Many tools allows for providing of custom definitions of these patterns, but from a personal experience, they are rarely used.} and suffers false positives.
 
-An example of the approches used in this class of static analysis is detection of matching pairs of functions. For example, any {\tt open()} call should be later followed with one {\tt close()} in every possible path. Or a state machine can be used to detect missing delimiter between statements or a missing {\tt break} in a {\tt switch}.
+An example of the approches used in this class of static analysis is detection of matching pairs of functions. For example, any {\tt open()} call should be later followed with one {\tt close()} in every possible path. Or a state machine can be used to detect missing delimiter between statements or a missing {\tt break} in a {\tt switch}~\cite{dynamine}.
+
+\subsubsection{Lint}
+Lint was originally created in the 70's for early C language~\cite[Chap. 2.2]{KrenaVojnarOverview} and since then, multiple new tools for various languages was inspired by it: splint, cpplint, JSLint, Pylint, etc. It searches for patterns that are likely to be bugs, to be non-portable, or to be wasteful~\cite{lintMan}. Many of the follower implementations are open-source.
+
+\subsubsection{CppCheck}
+An open-source tool for C/C++ languages. It can only a very simple {\em control flow analysis}, where it expects that all statements can be always either true or false and thus all statements should be always reachable~\cite{cppcheckDesign}.
+
 % ......
 \subsection{Data flow analysis}
 Tools using it: Coverity~\cite{KrenaVojnarOverview}, CodeSonar~\cite{KrenaVojnarOverview}, TruePath~\cite{KrenaVojnarOverview}, FindBugs~\cite{KrenaVojnarOverview}
@@ -45,15 +52,27 @@ These methods, in industrial tools frequently combined with {\em error patterns}
 
 The analysis can be either {\em forward}, where the state at the exit of one basic block is used as the input of the following block and which starts at the beginning of the program. Or {\em backwards analysis}, where the algorithm starts in an end state and attempts to find a path to a start state. This second approach can be useful to determine whether a particular end configuration is reachable.
 
+\subsubsection{Coverity}
+A proprietary tool (and company) providing a free service for open-source projects (\url{http://scan.coverity.com}). Uses restricted formal verification, but getting to specific details is hard or impossible. Supports languages Java, C/C++, C\#, JavaScript, Ruby, and Python.
+
+\subsubsection{FindBugs}
+FindBugs is an open-source code analyser for Java langauge with plugins for many Java IDEs.
+
 % ......
 \subsection{Abstract interpretation}
-Tools using it: AbsInt~\cite{KrenaVojnarOverview}, Astrée~\cite{Astree1,KrenaVojnarOverview}, PolySpace~\cite{KrenaVojnarOverview}
+Tools using it: Astrée~\cite{Astree1,KrenaVojnarOverview}, PolySpace~\cite{KrenaVojnarOverview}
 
 {\em Abstract interpretation} shares a blurry border with {\em model checking} and it may be different to determine where a specific method is. The basic way of how abstract interpretation works is to run a symbolic execution of the program. On every statement, transform specific values into an abstract context and {\em widen} (over-approximate) or {\em narrow} to refine the result after widening.
 
 The widening and narrowing is usually implemented by using a pair of monotone functions: {\em Abstraction} denoted $\alpha$ and {\em concretisation} denoted $\gamma$ forms a Galois connection.
 
 These methods can be sound, but not every abstract interpretation is, as they can range from a simple syntax analyser to full model checking.
+
+\subsubsection{Astrée}
+A tool for analysing applications written in C language. It is a proprietary tool used for safety-critical applications, for example by Airbus~\cite{KrenaVojnarOverview}. It provides a sound static analysis. False positives are considered a reasonable price for the soundess~\cite{Astree1}.
+
+\subsubsection{PolySpace}
+A proprietary tool for C, C++, and Ada languages.
 
 %======================================================================
 \section{Model Checking}\label{chap:fav:modelChecking}
@@ -78,6 +97,8 @@ The methods used for this include {\em symmetry reduction} in cases where it is 
 Other solutions can be to use only one of many possible pathes for ordering of concurent actions that are independent of each other and compress the size of states by using pointers to the previous state for values that didn't changed. Or the tool can evaluate the properties at the same time when a new state is generated, and stop immediately once it is clear that this prefix cannot be accepted by the automata denoting correctness specification.
 
 
+\subsubsection{CPAChecker}
+An open-source tool and a framework for analysis of programs in C language. It is based on the idea of {\em configurable program analysis}~\cite{CPAChecker}, which uses user configuration to perform a reachability analysis.
 
 
 %======================================================================
