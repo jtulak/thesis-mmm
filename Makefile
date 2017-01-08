@@ -7,11 +7,9 @@
 CO=proj
 
 all: $(CO).pdf
+	@make normostrany
 
 pdf: $(CO).pdf
-
-html: rdrand.dvi
-	tex4ht rdrand.dvi
 
 $(CO).ps: $(CO).dvi
 	dvips $(CO)
@@ -38,7 +36,10 @@ desky:
 	pdflatex desky
 
 normostrany:
-	echo "scale=2; `detex -n content/*.tex | wc -c`/1800;" | bc
+	@echo "---------------------------------"
+	@echo "NORMOSTRANY:"
+	@echo "scale=2; `detex -n content/*.tex | wc -c`/1800;" | bc
+	@echo "---------------------------------"
 
 clean:
 	rm -f *.dvi *.log $(CO).blg $(CO).bbl $(CO).toc *.aux $(CO).out $(CO).lof
