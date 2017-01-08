@@ -10,7 +10,30 @@ The idea of changes described in this work is to create a table which holds valu
 \section{First patchset}\label{chap:refactoring:first}
 The first patchset implemented the core parts from the desire state. The implementation of the basic table made the {\tt mkfs\_xfs.c} file more readable, even if it was possible to remove only basic checks. It also brought a much more strict input validation, so few of the existing tests in xfstests had to be updated and a new test was created, with the goal to watch only for input validation, whether {\tt mkfs.xfs} correctly accepts or refuses any given combination of options and values.
 
+Size of this patchset is 19 patches and the total changes are:
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the first patchset~\cite{finalPatchset1}.}]
+include/Makefile        |    5 +-
+ include/xfs_multidisk.h |   73 ++
+ libxfs/init.c           |    6 +
+ libxfs/linux.c          |   11 +-
+ man/man8/mkfs.xfs.8     |   45 +-
+ mkfs/Makefile           |    2 +-
+ mkfs/maxtrres.c         |    2 +-
+ mkfs/proto.c            |   58 +-
+ mkfs/xfs_mkfs.c         | 1983 +++++++++++++++++++++++++++++------------------
+ mkfs/xfs_mkfs.h         |   89 ---
+ repair/xfs_repair.c     |   44 +-
+11 files changed, 1417 insertions(+), 901 deletions(-)
+\end{lstlisting}
+
 
 \section{Second patchset}\label{chap:refactoring:second}
 The second part of my changes is focused mostly on conflicts detection and allows for almost all checks to be removed from the code as ad-hoc solutions, as the new structures and functions take care of them automatically. Any programmer making a change just has to correctly specify values in a {\tt struct opt\_params}, write in a list of conflicting options, and the validation of the new option is guaranteed to work correctly and seamlessly.
+
+Size of this patchset in the first RFC is 22 patches and the total changes are:
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the second patchset~\cite{secondSetRFC}.}]
+ mkfs/xfs_mkfs.c | 2952 +++++++++++++++++++++++++++++++++++--------------------
+ 1 file changed, 1864 insertions(+), 1088 deletions(-)
+\end{lstlisting}
+
 
