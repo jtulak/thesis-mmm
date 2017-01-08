@@ -9,3 +9,6 @@ With respect to possible difficulties with implementing various advanced methods
 Some tools will be used multiple times, because while, for example, {\em Coverity Scan} can be used on the whole source of {\em xfsprogs}, other tools like {\em CPAChecker} require modelling of the environment and so for practical reasons, I will run them only on an extracted part of {\tt mkfs\_xfs.c}, where things like access to disk devices is removed to create a maximally self-contained code. This means that we won't be able to detect errors in some parts of the code, but it is nearly impossible to model and test a whole operating system and we have to make a cut somewhere. 
 
 Thus, to be able to compare the various tools directly, some of the tools are run both on the full code as well as on the dissected part.
+
+A potentially interesting comparison could be if there exists some tools using neural networks and deep learning as an integral part in their algorithms. For example as a heuristic to drive the selection of inference rules in theorem proving, or for spotting error patterns~\footnote{Some attempts in modeling a code are hinted in {\em On the Naturalness of Software} by Abram Hindle: \url{http://dl.acm.org/citation.cfm?id=2902362}.}
+% TODO http://dl.acm.org/citation.cfm?id=2902362 download and read... search for deep learning sources
