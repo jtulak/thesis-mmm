@@ -2,4 +2,10 @@
 \chapter{Useful Techniques and Models}\label{chap:techniques}
 In this chapter, we discuss which techniques and models of formal anlysis and verification are useful for the code of {\tt mkfs.xfs}. Let us at first define important constraints that are limiting or directing our choice.
 
-First of all, we are analysing a single-threaded application. This greatly reduces the state space and means that we also can use methods that do not allow for concurency.
+First of all, we are analysing a single-threaded application. This greatly reduces the state space and means that we also can use methods that do not allow for concurency. On the other side, given that the program accepts user input, some variables has an infinite number of potential values and any method based on state space checks has to cope with this fact.
+
+With respect to possible difficulties with implementing various advanced methods and their required proficiency, I decided to begin with well-known and used tools and gradually move from these production-ready, easy to use solutions to tools requiring more of user input.
+
+Some tools will be used multiple times, because while, for example, {\em Coverity Scan} can be used on the whole source of {\em xfsprogs}, other tools like {\em CPAChecker} require modelling of the environment and so for practical reasons, I will run them only on an extracted part of {\tt mkfs\_xfs.c}, where things like access to disk devices is removed to create a maximally self-contained code. This means that we won't be able to detect errors in some parts of the code, but it is nearly impossible to model and test a whole operating system and we have to make a cut somewhere. 
+
+Thus, to be able to compare the various tools directly, some of the tools are run both on the full code as well as on the dissected part.
