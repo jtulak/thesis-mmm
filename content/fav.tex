@@ -1,3 +1,53 @@
 
 \chapter{Formal Analysis and Verification} \label{chap:fav}
-What it is...
+%----------------------------------------------------------------------
+As the role of computers in human society is growing in ever faster pace, the consequences of any error are growing too. Consider, for example, the speed with which smarthones seized our pockets. They certainly brings many benefits, but as we become devpendent on the smartphones, any malfuncion or error in them can affect our life. From not having access to an important information to a direct danger, like in the case of motorists stranded by their mobile navigation in the middle of wilderness~\cite{appleMaps}.
+
+Or consider the recent advances in the area of autonomous vehicles. Where an error in smartphones can only deprive us of an information, or provide an incorrect one, an error in a self-driving car can cause it to swerve into a wall with dire consequences for the passengers.
+
+Common testing techniques, despite advances in this field, are still mostly reactive and can detect only known errors, for which a test was written, and can't provide a guarantee of correctness. That is, they can tell that "none of these specified errors happened," but can't tell whether the system is really free of errors with respect to a specification.
+
+Formal methods, with roots in mathematical areas like theorem proving, on the other side frequently has the power to verify the correctness. But unlike the common testing techniques, and despite an interest of the industry, they are not yet widely used. A notable exception to this is a {\em static analysis}, which, in some of its weaker forms, is becoming a part of integrated development environments (IDE) like Xcode or Eclipse~\cite{xcodeAnalysis}.
+
+A part of the reason for the small adoption of formal methods is their complexity. They either require advanced user knowledge, like a human-driven deductions in {\em theorem proving}, require excessive modelling of the environment for the system like {\em model checking}, or are simply unable to cope with the size of the code and the size of it's state space.
+
+By the term {\em formal analysis}, we describe methods for answering questions other than whether the tested system is free of errors with respect to some specification. That is, it includes questions like whether the program is guaranteed to always terminate, if a buffer size is bound and so on.
+
+{\em Formal verification} then denotes methods capable of proving errorlessness of the given system with respect to correctness specification. {\em Completness} of a method is a property guaranteeing that it won't raise a false alarm, while if a method that is {\em sound} terminates and tells that there are no erros, the system is indeed correct.
+
+In the following parts of this work, we will first discuss some of the formal techniques (the rest of this chapter) and then also their usefullness on a real, production code in the chapter~\nameref{chap:techniques}. We will look not only on their result, but also on the cost of using them, both in timew and expertise necessary for their correct use.
+
+%======================================================================
+\section{Static Analysis}\label{chap:fav:staticAnalysis}
+%----------------------------------------------------------------------
+A rather broad, but commonly used definition of {\em static analysis} is that it is an analysis that collects some information about the behaviour of a system without actually executing it under its original semantics~\cite[Chap. 2.2]{KrenaVojnarOverview}. This category includes methods:
+
+{\em Abstract interpretation}, in which an abstract overrepresentation of the statements of the program is evaluated in an abstract machine for all possible inputs at once and we exchange completness for speed or even the possibility to analyse the system.
+
+{\em Data flow analysis} tracks how a given set of properties propagates through the program without directly exectuting it.
+
+{\em Error patterns} then denote the probably most common method used in various lightweight implementations already present in various IDEs, in Lint and Cppcheck software, and others. As the name itself explains, this methods attempts to detect commonly occuring patterns that programmers make, but which lead to an error. A simple example may be a missing {\tt break} statement, or missing boundary checks before accessing an array.
+
+Let us now look more in the detail on each of these methods and on their implementations, but bear in mind that in many cases, the tools we will see are not clearly distinguished and can be placed into more than one category. Thus, the tools are categorised according to the most important principles in their implementation.
+
+\subsection{Error patterns}
+Tools using it: Lint~\cite{KrenaVojnarOverview}, (and it's followers), cppcheck\footnote{I'm not sure about this and didn't found it cited anywhere, but from its code it looks like they search for error patterns.}
+
+\subsection{Data flow analysis}
+Tools using it: Coverity~\cite{KrenaVojnarOverview}, CodeSonar~\cite{KrenaVojnarOverview},, TruePath~\cite{KrenaVojnarOverview}, FindBugs~\cite{KrenaVojnarOverview},
+
+\subsection{Abstract interpretation}
+Tools using it: AbsInt~\cite{KrenaVojnarOverview},, Astrée~\cite{Astree1,KrenaVojnarOverview},, PolySpace~\cite{KrenaVojnarOverview},
+
+%======================================================================
+\section{Model Checking}\label{chap:fav:modelChecking}
+%----------------------------------------------------------------------
+Tools using it: RuleBase~\cite{KrenaVojnarOverview}, Incisive VErifier~\cite{KrenaVojnarOverview}, Magellan~\cite{KrenaVojnarOverview}, JasperGold Formal Property Verification App~\cite{KrenaVojnarOverview}, Questa Formal Verification~\cite{KrenaVojnarOverview},CPAchecker~\cite{KrenaVojnarOverview}, Wolverine~\cite{KrenaVojnarOverview}, CBMC~\cite{KrenaVojnarOverview}, LLBMC~\cite{KrenaVojnarOverview}
+
+
+%======================================================================
+\section{Theorem Proving}\label{chap:fav:theoremProving}
+%----------------------------------------------------------------------
+Tools using it: VCC~\cite{KrenaVojnarOverview}, ESC/Java2~\cite{KrenaVojnarOverview}, VS3~\cite{KrenaVojnarOverview}
+
+
