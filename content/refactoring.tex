@@ -1,22 +1,31 @@
 \chapter{Refactoring of mkfs.xfs} \label{chap:refactoring}
 
 The idea of changes described in this work is to rewrite a complex and
-chaotic code with a table that holds values like minimum/maximum, default
-values, conflicts and others. Thus, instead of ad-hoc conditions and
-operations, there will be just one global structure, well documented and
-easily readable and extendable. This structure should hold also the
-user-entered values and limit code and variables duplication as much as
-possible.
+chaotic code for parsing user input with a table that holds values like
+minimum/maximum, default values, conflicts and others. Thus, instead of
+ad-hoc conditions and operations, there will be just one global structure,
+well documented and easily readable and extendable. This structure should
+hold also the user-entered values and limit code and variables duplication
+as much as possible.
+
+During the development, I had to repeatedly solve conflicts with changes
+from other developers that got merged into xfsprogs while I was still
+working on my changes. That led me to cut the work into multiple parts.
+That way, others could benefit from changes that were already done and I
+wouldn't have to maintain this so many patches up to date. There are two
+main patchsets which are accompanied by few small and enclosed changes that
+could be easily submitted independently.
 
 \section{Development processes}\label{chap:refactoring:processes}
 
-At first I describe the development processes and tools used for xfsprogs,
-which are similar as tools and processes used for Linux Kernel development.
+At first I will briefly describe the development processes and tools used for
+xfsprogs, which are similar as tools and processes used for Linux Kernel
+development.
 
 Most of the communication is happening on a mailing
 list\footnote{Specifically linux-xfs@vger.kernel.org.} while IRC chat is
 used for some less
-important and more day to day issues. The code is hosted in a GIT repository,
+important and more day to day issues. The code is hosted in a Git repository,
 but only selected maintainers have a write access.
 
 Any commit an author wants to get merged into the code has to be submitted
@@ -36,15 +45,155 @@ community and is part of Linux Kernel source. Such a rules has their
 meaning and helps to keep a consistent style throughout xfsprogs, but the
 fact that they are not documented causes unnecessary issues and delays.
 
+\section{Initial codebase}\label{chap:refactoring:initialcodebase}
+
+Almost all the important code I was changing is located in {\tt
+mkfs/xfs\_mkfs.c} file. The code before the first patchset was merged can
+be accessed in the project's Git repository as a version 4.6. Git revision
+hash for this version is {\tt 09033e35}. In this revision, the parsing of
+user input works as follows.
+
+In {\tt main(int argc, char **argv)} function is a nested loop using a
+standard getopt to detect an option like {\tt -d} for data section or {\tt
+-l} for log section, and then the nested loop uses custom functions to
+parse specific suboptions and their values.
+
+As an example, here is the beginning of aforementioned loops, as it is in
+the code, and some issues with this code.
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=C, numbers=none, numberstyle=\tiny\color{black},
+caption= {Part of option-parsing loop from mkfs.xfs with additional
+comments.}]
+while ((c = getopt(argc, argv, "b:d:i:l:L:m:n:KNp:qr:s:CfV")) != EOF) {
+	switch (c) {
+	case 'C':
+	case 'f':
+		force_overwrite = 1;
+		break;
+	case 'b':
+		p = optarg;
+		/*
+		 * This nested loop will parse the argument of -b, which is
+		 * a list of suboptions separated by comma, but no space.
+		 */
+		while (*p != '\0') {
+			char	*value;
+			
+			/*
+			 * The getsubopt() function removes the first suboption
+			 * from the 'p' variable and returns a number
+			 * representing the specific suboption, while
+			 * saving its value (if any) to 'value'.
+			 */
+			switch (getsubopt(&p, (constpp)bopts, &value)) {
+
+			/*
+			 * an example of how one suboption is parsed.
+			 */
+			case B_LOG:
+				if (!value || *value == '\0')
+					reqval('b', bopts, B_LOG);
+				if (blflag)
+					respec('b', bopts, B_LOG);
+				if (bsflag)
+					conflict('b', bopts, B_SIZE,
+							B_LOG);
+				blocklog = atoi(value);
+				if (blocklog <= 0)
+					illegal(value, "b log");
+				blocksize = 1 << blocklog;
+				blflag = 1;
+				break;
+\end{lstlisting}
+
+While the {\tt -f} option is simple, in case of {\tt -b log=XX} we can see
+how the parsing can get complex. The code tests if the value is not empty
+and if it is, it raises an error. Then it tests whether this specific
+option was already used, because repeated specification of the same option
+is prohibited\footnote{Respecification is forbidden for this reason:
+consider, what happens if a user uses this combination of options: {\tt  -b
+size=4k -d size=1000b -b size=512}, where the {\tt b} suffix in a number
+denotes a block. At first, blocksize is set to one value, a size of data
+section is computed based on this value and then the blocksize is changed.
+Thus, any following use of blocksize will have a value different than what
+was used for the first computation. This could be countered by computing
+all values after all options are parsed, yet it would still be ambiguous
+and might behave differently than the user expected. Forbidding it is a
+cleaner and safer approach.} Mkfs allows to
+specify the block size both in explicit size in bytes and in a logarithmic
+scale, but only one of these options can be used at a time. So the code
+also has to check if the other variant was used and compute both values.
+
+You can see that most of the things happening in this part of code are
+rather generic -- all options has to check for the respecification, whether
+a required value is present, or possibly whether the value is in a certain
+range of valid values.
+
+However, nothing of these universal tasks is automated -- every single
+option has to reimplement the same tests. Some options has almost all logic
+in it's {\tt case} where it is at leas in one place. But options with more
+complex dependencies and conflicts have only part of it's logic there and
+the rest of it is in a section of code following the main loop, in ad-hoc
+tests and computations.
+
+To further complicate it, some parts of {\tt mkfs.xfs} are more than 20
+years old and the coding style and the general approach to specific things
+changed since then, but the old code did not. If such old code needs a
+change, there is always a risk that the editing programmer assumes a
+different behaviour similar to the one that newer options have, but that
+assumption is incorrect.
+
+Also the six variables specific for {\tt -b log} are not explicitly tied
+together and because almost every option has a similar mix of multiple
+variables, it is difficult to keep all the important ones in a mental image
+of the code and always use the correct one. Many of these variables are
+unnecessary or reduntant, so in some cases, the values are copied from one
+to another and if a change is put into a wrong place, a specific condition
+may cause that the changed value is overwritten later on with the old one,
+etc.
+
+The consequence of these issues is that {\tt mkfs.xfs} did a bad job of
+validating user input from the command line and an unexpected value could
+cause that the worst case, the created filesystem could fail after some use
+and lose user's data. Even if such a case was detected and the specific
+error fixed, the minimal code reuse meant that other options could still be
+susceptible to the same or similar issue.
+
 \section{First patchset}\label{chap:refactoring:first}
-As is shown in~\ref{chap:xfs:mkfs}, the situation was not ideal and the
+As is shown in~\ref{chap:refactoring:initialcodebase}, the situation was not ideal and the
 state of the code led to many known issues. David Chinner, then maintainer
 of XFS, presented a set of patches as an RFC\footnote{Request for comment -
 	signalling, that the presented patches are not meant to be merged,
 but the author wants to hear other people's thoughts about these changes.}
-in November 2013~\cite{davidsPatches} in an attempt to raise a discussion,
-however, nobody joined it and David Chinner himself didn't continue in
-pressing this matter for few years.
+in November 2013~\cite{davidsPatches} in an attempt to raise a discussion.
+However, nobody joined it and David Chinner himself didn't continue in
+pressing this matter for few years. Here is an excerpt from his RFC:
+
+\begin{displayquote}
+This is still a work in progress, but is complete enough to get
+feedback on the general structure. The problem being solved here is
+that mkfs does a terrible job of input validation from the command
+line, has huge amounts of repeated code in the sub options
+processing loops and has many, many unnecessary variable for
+tracking simply things like whether a parameter was specified.
+
+This patchset introduces a parameter table structure that is used to
+define the parameters and their constraints. Things like minimum and
+maximum valid values, default values, conflicting options, etc are
+all contained within the table, so all the "policy" is found in a
+single place.
+
+\ldots
+
+The flow on effect of this is that we can remove the many, many
+individual variables and start passing the option structures to
+functions rather than avoiding using functions because passing so
+many variables is messy and nasty. IOWs, it lays the groundwork for
+factoring xfs\_mkfs.c into something more than a bunch of spagetti...
+\end{displayquote}
+
+
 
 When I joined the XFS team and began with the refactoring in
 2015~\cite{myFirstPatches}, I picked up this patchset and brought it up to
@@ -52,11 +201,6 @@ date with the codebase that in some parts changed substantially in the two
 years. Once the patches were applicable for the current code, I began
 fixing functional issues and adding further changes.
 
-During the development, I had to repeatedly solve conflicts with changes
-from other developers that got merged into xfsprogs. That led me to cut the
-work into multiple parts. That way, others could benefit from changes that
-were already done and I wouldn't have to maintain this so many patches up
-to date.
 
 The first part took until May 2016, when it was merged into the upstream
 repository~\cite{finalPatchset1,finalPatchset1Announce}.
@@ -83,6 +227,7 @@ include/Makefile        |    5 +-
  repair/xfs_repair.c     |   44 +-
 11 files changed, 1417 insertions(+), 901 deletions(-)
 \end{lstlisting}
+
 
 
 \section{Second patchset}\label{chap:refactoring:second}
