@@ -64,7 +64,8 @@ the code, and some issues with this code.
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=C, numbers=none, numberstyle=\tiny\color{black},
 caption= {Part of option-parsing loop from mkfs.xfs with additional
-comments.}]
+comments.},
+label={lst:refactoring:loopexample}]
 while ((c = getopt(argc, argv, "b:d:i:l:L:m:n:KNp:qr:s:CfV")) != EOF) {
 	switch (c) {
 	case 'C':
@@ -107,23 +108,27 @@ while ((c = getopt(argc, argv, "b:d:i:l:L:m:n:KNp:qr:s:CfV")) != EOF) {
 				break;
 \end{lstlisting}
 
-While the {\tt -f} option is simple, in case of {\tt -b log=XX} we can see
-how the parsing can get complex. The code tests if the value is not empty
-and if it is, it raises an error. Then it tests whether this specific
-option was already used, because repeated specification of the same option
-is prohibited\footnote{Respecification is forbidden for this reason:
-consider, what happens if a user uses this combination of options: {\tt  -b
-size=4k -d size=1000b -b size=512}, where the {\tt b} suffix in a number
-denotes a block. At first, blocksize is set to one value, a size of data
-section is computed based on this value and then the blocksize is changed.
-Thus, any following use of blocksize will have a value different than what
-was used for the first computation. This could be countered by computing
-all values after all options are parsed, yet it would still be ambiguous
-and might behave differently than the user expected. Forbidding it is a
-cleaner and safer approach.} Mkfs allows to
-specify the block size both in explicit size in bytes and in a logarithmic
-scale, but only one of these options can be used at a time. So the code
-also has to check if the other variant was used and compute both values.
+While the {\tt -f} option is simple, in case of {\tt -b
+log=XX}\footnote{Here and on other places, I'm using the block option as an
+example, because this option has only two suboptions, so I can show it in
+full if needed.} we can see how the parsing can get complex. The code tests
+if the value is not empty and if it is, it raises an error. Then it tests
+whether this specific option was already used, because repeated
+specification of the same option is prohibited\footnote{Respecification is
+	forbidden for this reason: consider, what happens if a user uses
+	this combination of options: {\tt  -b size=4k -d size=1000b -b
+	size=512}, where the {\tt b} suffix in a number denotes a block. At
+	first, blocksize is set to one value, a size of data section is
+	computed based on this value and then the blocksize is changed.
+	Thus, any following use of blocksize will have a value different
+	than what was used for the first computation. This could be
+	countered by computing all values after all options are parsed, yet
+	it would still be ambiguous and might behave differently than the
+	user expected. Forbidding it is a cleaner and safer approach.} Mkfs
+	allows to specify the block size both in explicit size in bytes and
+	in a logarithmic scale, but only one of these options can be used
+	at a time. So the code also has to check if the other variant was
+	used and compute both values.
 
 You can see that most of the things happening in this part of code are
 rather generic -- all options has to check for the respecification, whether
@@ -193,8 +198,6 @@ many variables is messy and nasty. IOWs, it lays the groundwork for
 factoring xfs\_mkfs.c into something more than a bunch of spagetti...
 \end{displayquote}
 
-
-
 When I joined the XFS team and began with the refactoring in
 2015~\cite{myFirstPatches}, I picked up this patchset and brought it up to
 date with the codebase that in some parts changed substantially in the two
@@ -202,9 +205,9 @@ years. Once the patches were applicable for the current code, I began
 fixing functional issues and adding further changes.
 
 
-The first part took until May 2016, when it was merged into the upstream
+This lasted until May 2016, when this patchset was merged into the upstream
 repository~\cite{finalPatchset1,finalPatchset1Announce}.
-The first patchset implemented the core parts from the desired state. The
+These changes implemented the core parts from the desired state. The
 implementation of the basic table made the {\tt mkfs\_xfs.c} file more
 readable, even if it was possible to remove only basic checks. It also
 brought a much more strict input validation, so few of the existing tests
@@ -226,6 +229,159 @@ include/Makefile        |    5 +-
  mkfs/xfs_mkfs.h         |   89 ---
  repair/xfs_repair.c     |   44 +-
 11 files changed, 1417 insertions(+), 901 deletions(-)
+\end{lstlisting}
+
+For comparison, here is the nested loop from
+\ref{lst:refactoring:loopexample} code example after this patchset was
+applied. You can see that the section for {\tt B\_LOG} is now much cleaner
+(no branching, only few assignments) and the generic logic was moved away
+into a function shared with other options:
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=C, numbers=none, numberstyle=\tiny\color{black},
+caption= {Part of option-parsing loop from mkfs.xfs after the first patch
+set.}]
+case 'b':
+	p = optarg;
+	while (*p != '\0') {
+		char	**subopts = (char **)bopts.subopts;
+		char	*value;
+
+		switch (getsubopt(&p, (constpp)subopts,
+					&value)) {
+		case B_LOG:
+			blocklog = getnum(value, &bopts, B_LOG);
+			blocksize = 1 << blocklog;
+			blflag = 1;
+			break;
+\end{lstlisting}
+
+
+\subsection{opt\_params table}
+The key part of this patchset is the creation of {\tt opt\_params} table.
+It is a structure that is holds all the important values for a specific
+option in one place, easily acessible and consistent across whole file.
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=C, numbers=none, numberstyle=\tiny\color{black},
+caption= {Definition of the table.}]
+struct opt_params {
+	const char	name;
+	const char	*subopts[MAX_SUBOPTS];
+
+	struct subopt_param {
+		int		index;
+		bool		seen;
+		bool		str_seen;
+		bool		convert;
+		bool		is_power_2;
+		int		conflicts[MAX_CONFLICTS];
+		long long	minval;
+		long long	maxval;
+		long long	defaultval;
+	}		subopt_params[MAX_SUBOPTS];
+};
+\end{lstlisting}
+
+The meaning of the specific fields is this:
+\begin{description}
+\item[name] {\em MANDATORY}
+  Name is a single char, e.g., for '-d file', name is 'd'.
+
+\item[subopts] {\em MANDATORY}
+  Subopts is a list of strings naming suboptions. In the example above,
+  it would contain "file". The last entry of this list has to be NULL.
+
+\item[subopt\_params] {\em MANDATORY}
+  This is a list of structs tied with subopts. For each entry in subopts,
+  a corresponding entry has to be defined.
+\end{description}
+
+
+The {\tt subopt\_param} has the following members:
+\begin{description}
+\item[index] {\em MANDATORY}
+    This number, starting from zero, denotes which item in subopt\_params
+    it is. The index has to be the same as is the order in subopts list,
+    so we can access the right item both in subopt\_params and subopts.
+
+\item[seen] {\em INTERNAL}
+    Do not set this flag when defining a subopt. It is used to remeber that
+    this subopt was already seen, for example for conflicts detection.
+
+\item[str\_seen] {\em INTERNAL}
+    Do not set. It is used internally for respecification, when some options
+    has to be parsed twice - at first as a string, then later as a number.
+
+\item[convert] {\em OPTIONAL}
+    A flag signalling whether the user-given value can use suffixes.
+    If you want to allow the use of user-friendly values like 13k, 42G,
+    set it to true.
+
+\item[is\_power\_2] {\em OPTIONAL}
+    An optional flag for subopts where the given value has to be a power
+    of two.
+
+\item[conflicts] {\em MANDATORY}
+    If your subopt is in a conflict with some other option, specify it.
+    Accepts the .index values of the conflicting subopts and the last
+    member of this list has to be LAST\_CONFLICT.
+
+\item[minval, maxval] {\em OPTIONAL}
+    These options are used for automatic range check and they have to be
+    always used together in pair. If you don't want to limit the max value,
+    use something like UINT\_MAX. If no value is given, then you must either
+    supply your own validation, or refuse any value in the 'case
+    X\_SOMETHING' block. If you forget to define the min and max value, but
+    call a standard function for validating user's value, it will cause an
+    error message notifying you about this issue.
+
+    (Said in another way, you can't have minval and maxval both equal
+    to zero. But if one value is different: minval=0 and maxval=1,
+    then it is OK.)
+
+\item[defaultval] {\em MANDATORY}
+    The value used if user specifies the subopt, but no value.
+    If the subopt accepts some values (-d file=[1|0]), then this
+    sets what is used with simple specifying the subopt (-d file).
+    A special SUBOPT\_NEEDS\_VAL can be used to require a user-given
+    value in any case.
+		
+\end{description}
+
+{\tt opt\_params} is instantiated for every option category, e.g. for {\tt -b} it is:
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=C, numbers=none, numberstyle=\tiny\color{black},
+caption= {Instantiation of the table for block options.}]
+struct opt_params bopts = {
+	.name = 'b',
+	.subopts = {
+#define	B_LOG		0
+		"log",
+#define	B_SIZE		1
+		"size",
+		NULL
+	},
+	.subopt_params = {
+		{ .index = B_LOG,
+		  .conflicts = { B_SIZE,
+				 LAST_CONFLICT },
+		  .minval = XFS_MIN_BLOCKSIZE_LOG,
+		  .maxval = XFS_MAX_BLOCKSIZE_LOG,
+		  .defaultval = SUBOPT_NEEDS_VAL,
+		},
+		{ .index = B_SIZE,
+		  .convert = true,
+		  .is_power_2 = true,
+		  .conflicts = { B_LOG,
+				 LAST_CONFLICT },
+		  .minval = XFS_MIN_BLOCKSIZE,
+		  .maxval = XFS_MAX_BLOCKSIZE,
+		  .defaultval = SUBOPT_NEEDS_VAL,
+		},
+	},
+};
 \end{lstlisting}
 
 
