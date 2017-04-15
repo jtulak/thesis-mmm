@@ -1,14 +1,72 @@
 \chapter{Refactoring of mkfs.xfs} \label{chap:refactoring}
-As is shown in~\ref{chap:xfs:mkfs}, the situation was not ideal and the state of the code led to many known issues. David Chinner, then maintainer of XFS, presented a set of patches as a request for comment (RFC) in November 2013~\cite{davidsPatches} in an attempt to raise a discussion, however, nobody joined it and David Chinner himself didn't continue in pressing this matter for few years.
 
-When I joined the XFS team and began with the refactoring in 2015~\cite{myFirstPatches}, I picked up this patchset and brought it up to date with the codebase that in some parts changed substantially in the two years. Then I continued when David Chinner left off, fixing issues with his patches and adding further changes. This first part took until May 2016, when it was merged into the upstream repository~\cite{finalPatchset1,finalPatchset1Announce}.
+The idea of changes described in this work is to rewrite a complex and
+chaotic code with a table that holds values like minimum/maximum, default
+values, conflicts and others. Thus, instead of ad-hoc conditions and
+operations, there will be just one global structure, well documented and
+easily readable and extendable. This structure should hold also the
+user-entered values and limit code and variables duplication as much as
+possible.
 
-Once this change was merged and provided a stable point so I didn't have to keep so much code in my own local repository up to date with upstream, I began to work on the second set of changes. I submitted an RFC of these changes in December 2016~\cite{secondSetRFC} and as of now, I'm awaiting a review. Such a big and complex changes are usually reviewed only by the maintainer who changed in late December -- Eric Sandeen took this position instead of David Chinner. This probably caused some delay.
+\section{Development processes}\label{chap:refactoring:processes}
 
-The idea of changes described in this work is to create a table which holds values like minimum/maximum, default values, conflicts and others. And instead of ad-hoc conditions and operations, there will be just one global structure, well documented and easily readable and extendable. This structure should hold also the user-entered values and limit code and variables duplication as much as possible.
+At first I describe the development processes and tools used for xfsprogs,
+which are similar as tools and processes used for Linux Kernel development.
+
+Most of the communication is happening on a mailing
+list\footnote{Specifically linux-xfs@vger.kernel.org.} while IRC chat is
+used for some less
+important and more day to day issues. The code is hosted in a GIT repository,
+but only selected maintainers have a write access.
+
+Any commit an author wants to get merged into the code has to be submitted
+as a patch to the mailing list. There the patch awaits a review -- that is,
+some other developer has to check the changes and append his or her
+signature to this patch. Once the patch is reviewed and if there are no
+objections, the maintainer will merge it in a batch with other changes once
+in a time (for xfsprogs, it is usually about twice a month).
+
+However, there are many unwritten rules and customs, that are not apparent
+at first and a new developer finds about them usually only when she or he
+breaks such a rule.
+
+An example of such an unwritten rule is the exact coding style and the use of
+a code style checking script {\tt checkpatch.pl} originating in Kernel
+community and is part of Linux Kernel source. Such a rules has their
+meaning and helps to keep a consistent style throughout xfsprogs, but the
+fact that they are not documented causes unnecessary issues and delays.
 
 \section{First patchset}\label{chap:refactoring:first}
-The first patchset implemented the core parts from the desired state. The implementation of the basic table made the {\tt mkfs\_xfs.c} file more readable, even if it was possible to remove only basic checks. It also brought a much more strict input validation, so few of the existing tests in xfstests had to be updated and a new test was created, with the goal to watch only for input validation, whether {\tt mkfs.xfs} correctly accepts or refuses any given combination of options and values.
+As is shown in~\ref{chap:xfs:mkfs}, the situation was not ideal and the
+state of the code led to many known issues. David Chinner, then maintainer
+of XFS, presented a set of patches as an RFC\footnote{Request for comment -
+	signalling, that the presented patches are not meant to be merged,
+but the author wants to hear other people's thoughts about these changes.}
+in November 2013~\cite{davidsPatches} in an attempt to raise a discussion,
+however, nobody joined it and David Chinner himself didn't continue in
+pressing this matter for few years.
+
+When I joined the XFS team and began with the refactoring in
+2015~\cite{myFirstPatches}, I picked up this patchset and brought it up to
+date with the codebase that in some parts changed substantially in the two
+years. Once the patches were applicable for the current code, I began
+fixing functional issues and adding further changes.
+
+During the development, I had to repeatedly solve conflicts with changes
+from other developers that got merged into xfsprogs. That led me to cut the
+work into multiple parts. That way, others could benefit from changes that
+were already done and I wouldn't have to maintain this so many patches up
+to date.
+
+The first part took until May 2016, when it was merged into the upstream
+repository~\cite{finalPatchset1,finalPatchset1Announce}.
+The first patchset implemented the core parts from the desired state. The
+implementation of the basic table made the {\tt mkfs\_xfs.c} file more
+readable, even if it was possible to remove only basic checks. It also
+brought a much more strict input validation, so few of the existing tests
+in xfstests had to be updated and a new test was created, with the goal to
+watch only for input validation, whether {\tt mkfs.xfs} correctly accepts
+or refuses any given combination of options and values.
 
 Size of this patchset is 19 patches and the total changes are:
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the first patchset~\cite{finalPatchset1}.}]
@@ -28,6 +86,24 @@ include/Makefile        |    5 +-
 
 
 \section{Second patchset}\label{chap:refactoring:second}
+
+Once this change was merged and provided a stable point so I didn't have to
+keep so much code in my own local repository up to date with upstream, I
+began to work on the second set of changes. I submitted an
+RFC of these
+changes in December 2016~\cite{secondSetRFC}. Such a big and complex
+changes are something that most of the developers postpone, so it is
+usually reviewed only by the maintainer when nobody else starts it. In this
+case, however, the maintainer changed in late December -- Eric Sandeen took
+this position instead of David Chinner.
+
+Together, these two issues caused that despite my urging, there wasn't much
+reaction until March, when I submitted another version, this time
+intentionally not as an RFC. I also mentioned to few people that this is
+part of my thesis.
+
+The review of the second set revealed many disputable points and it become
+apparent that these patches will need further changes.
 The second part of my changes is focused mostly on conflicts detection and allows for almost all checks to be removed from the code as ad-hoc solutions, as the new structures and functions take care of them automatically. Any programmer making a change just has to correctly specify values in a {\tt struct opt\_params}, write in a list of conflicting options, and the validation of the new option is guaranteed to work correctly and seamlessly.
 
 Size of this patchset in the first RFC is 22 patches and the total changes are:
