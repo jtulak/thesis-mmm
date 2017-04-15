@@ -36,8 +36,19 @@ Except for the xfstests test suite, xfsprogs also uses an automatical static ana
 
 When a XFS partition is formated, up to three areas are created on the disk: Data section is always present. An optional real-time section is omitted by default. Log section has to exist always but can be placed on a different device. The data part is then in fact split into multiple de facto independent filesystems called Allocation Groups, that handle space allocation and allows for higher parallelism, as most operations can be done on each Allocation Group independently on the others. The log section can be also internal to each of the Allocation Groups.
 
-As each Allocation Group is a de facto standalone filesystem, each contains the superblock and block and inode allocations.
+As each Allocation Group is a de facto standalone filesystem, each contains
+the superblock and block and inode allocations and the only global
+information, maintained by the first (primary) AG is free space and total
+inode counts across the whole filesystem as can be seen
+on figure~\ref{fig:xfs:primaryAG}.
 
+\begin{figure}
+  \centering
+ \includegraphics[width=13cm,keepaspectratio]{fig/primary-ag} % Or .pdf
+ \caption{Primary AG right after mkfs~\cite[Ch. 3]{xfsStructure}.}
+\label{fig:xfs:primaryAG}
+\end{figure}
+	
 Real-time section is dedicated for files with a real-time attribute bit set, and operations with these files should have predictable latencies~\cite{xfsRealtime}. Log section is used to recover from situations like power failure on the next mount~\cite{xfsStructure,xfsman}.
 
 When created on striped RAID\footnote{Striped RAID is e.g. RAID 0, where logically sequential data are split into a number of physical blocks and written on multiple disks interleaved. For a RAID 0 on two drives it means that odd blocks are located on one drive and even blocks on the other.}, XFS can be informed about it and align all allocations and size to the stripe unit to maximize speed.
