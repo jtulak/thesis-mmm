@@ -64,7 +64,13 @@ When created on striped RAID\footnote{Striped RAID is e.g. RAID 0, where logical
 \section{mkfs.xfs}\label{chap:xfs:mkfs}
 %----------------------------------------------------------------------
 
-Now I describe in a greater detail the mkfs.xfs program itself, located in file {\tt mkfs/mkfs\_xfs.c}. This tool creates a new XFS filesystem with given properties. It is, as is usual for core Unix utilities, a non-interactive program which accepts multiple arguments when called and prints out the properties of the newly created filesystem if successful, or prints an error and usage help when an error occurs.
+This chapter describes in a greater detail the mkfs.xfs program itself, located
+in file {\tt mkfs/mkfs\_xfs.c}, from user point of view. For information about
+its implementation, see chapter~\ref{chap:refactoring:initialcodebase}. This
+tool creates a new XFS filesystem with given properties. It is, as is usual for
+core Unix utilities, a non-interactive program which accepts multiple arguments
+when called and prints out the properties of the newly created filesystem if
+successful, or prints an error and usage help when an error occurs.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Synopsis of mkfs.xfs utility~\cite{mkfs.xfsMan}.}]
 mkfs.xfs [ -b block_size ] [ -d data_section_options ] [ -f ]
@@ -74,14 +80,4 @@ mkfs.xfs [ -b block_size ] [ -d data_section_options ] [ -f ]
 \end{lstlisting}
 
 An example of such usage is {\tt mkfs.xfs -f /dev/sda1}. This simple example creates a XFS filesystem on device {\tt /dev/sda1} even if an existing filesystem existed there -- thus the {\tt -f} (as force) flag. For the whole description of mkfs.xfs usage it is better to refer to mkfs.xfs manual page. What is important to note here is that parsing the input arguments and computing inner values based on these inputs makes most of the circa 3,500\footnote{Before the merge of the last part of my changes. With these changes, mkfs has over 4,000 lines.} lines of code.
-
-\TODO{The following text is partly moved to
-\ref{chap:refactoring:initialcodebase}.}
-Before my refactoring, the code worked in this way: A big loop iterated over all arguments using the standard {\tt getopt} function from {\tt unistd.h}. This analysed the top-level arguments like {\tt -b} or {\tt -f}. For arguments that have some options, there was a second loop that parsed suboptions. In either way, when there were some values to be set that were in a conflict\footnote{For example {\tt -d agsize=x,agcount=y}: It is possible to either set the count of Allocation Groups and their size is computed, or, if size is given, their number is computed. Stating both at once makes no sense and is not allowed.}, then every case was unique. Some options had a test directly within this assignment for both conflicting options, others simply set up the value and tested the conflict later, after the getopt loop. Yet another options used both of these ways, as the author of each change thought it better or how it was required to achieve a given functionality.
-
-It is easy to see what could go bad in this: When changing one option, it was possible to forget to change the other one. If the test was done after getopt, any other option that would modify such a value\footnote{See {\tt -i size=x/log=y}. In the code, both options modify the same variables and differs only in accepted values. {\tt size} expects a number of bytes while {\tt log} expects a base two logarithm value.} could overwrite a conflicting value without a notice.
-
-Any new option required a careful reading through the existing code and possibly place some checks on multiple places. Thus it was difficult to know when any value is checked and safe for use in further computations.
-
-
 

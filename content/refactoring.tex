@@ -62,9 +62,9 @@ be accessed in the project's Git repository as a version 4.6. Git revision
 hash for this version is {\tt 09033e35}. In this revision, the parsing of
 user input works as follows.
 
-In {\tt main(int argc, char **argv)} function is a nested loop using a
-standard getopt to detect an option like {\tt -d} for data section or {\tt
--l} for log section, and then the nested loop uses custom functions to
+In {\tt main(int argc, char **argv)} function is a loop using a
+standard {\tt getopt} from {\tt unistd.h} to detect an option like {\tt -d} for data section or {\tt
+-l} for log section. For options that has some arguments, a nested loop uses custom functions to
 parse specific suboptions and their values.
 
 As an example, here is the beginning of aforementioned loops, as it is in
@@ -139,6 +139,12 @@ specification of the same option is prohibited\footnote{Respecification is
 	at a time. So the code also has to check if the other variant was
 	used and compute both values.
 
+Some options has a test directly within this assignment for conflicting
+options, others simply set up the value and test the conflicts later, after
+the {\tt getopt} loop. Yet another options uses both of these ways, depending on what the author of
+each change considered a better solution, how it was required to achieve a given
+functionality or how this part of code was changed over time.
+
 You can see that most of the things happening in this part of code are
 rather generic -- all options has to check for the respecification, whether
 a required value is present, or possibly whether the value is in a certain
@@ -167,10 +173,24 @@ to another and if a change is put into a wrong place, a specific condition
 may cause that the changed value is overwritten later on with the old one,
 etc.
 
+It is easy to see what could go bad in this: When changing one option, it was
+possible to forget to change the other one. If a test was done after {\tt
+getopt}, any other option that would modify a value\footnote{See {\tt -i
+size=x} and {\tt -i log=y}. In the code, both options modify the same variables
+and differs only in accepted values. {\tt size} expects a number of bytes while
+{\tt log} expects a base two logarithm value.}, which is used for a computation
+in another option, could overwrite the value and cause a conflict without a
+notice.
+
+Any new option required a careful reading through the existing code and
+possibly place some checks on multiple places. Thus it was difficult to know
+when any value is checked and safe for use in further computations.
+
+
 The consequence of these issues is that {\tt mkfs.xfs} did a bad job of
 validating user input from the command line and an unexpected value could
-cause that the worst case, the created filesystem could fail after some use
-and lose user's data. Even if such a case was detected and the specific
+cause that the worst case; the created filesystem could fail after some use
+and lose user's data. Even if an issue was detected and the specific
 error fixed, the minimal code reuse meant that other options could still be
 susceptible to the same or similar issue.
 
