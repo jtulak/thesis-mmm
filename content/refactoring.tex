@@ -487,10 +487,11 @@ smaller ones, which can get fixed, reviewed and merged faster. The first
 group focused on extending the options table not only for encoding validity
 range and basic conflicts, but also for user input.
 
-Key implemented functions in these patches are {\tt parse|get|set\_conf\_val}
+Most notable changes are functions {\tt parse|get|set\_conf\_val}
 -- a set of functions to manipulate the user input values. This is a key
-difference from the RFC, where the values were manipulated as pointers to the
-table.
+difference from the RFC. There the values were manipulated as pointers to the
+table, but other developers raised objections. Most notably Dave Chinner, who
+rebutted my worries about the use of setters and getters in a reply to my e-mail where I suggested them as another option~\cite{unifyTypes1, unifyTypes2}
 
 Compare code examples \ref{lst:refactoring:aliasing} and
 \ref{lst:refactoring:getter}.  The first example with aliases keeps a lot of
@@ -499,8 +500,7 @@ where exactly the pointer leads to. And even if he finds the first assignment,
 it is possible to mistakenly override the target address. In the second
 example, with setters and getters, it is apparent on the first glance, where
 the value is to be written or read. And it is impossible to mistakenly alter
-the target address.
-
+the target address. The disadvantage of using setters is that it is no longer possible to do in-situ increments/decrements (e.g. {\tt i++;}), however this is only a minor issue.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=C, numbers=none, numberstyle=\tiny\color{black},
@@ -546,7 +546,9 @@ set~\cite{secondSetSplitOtherVars}, because one of the other developers, Luis
 R. Rodriguez, has a work in progress that requires such infrastructure to be
 implemented.
 
-
+Because even this smaller set was not fully accepted until the end of April,
+but some minor work was still required, I further focused on other parts of
+this work and did not intend to use the second set in the tests in this work.
 
 
 
