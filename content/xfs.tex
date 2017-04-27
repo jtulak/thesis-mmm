@@ -59,6 +59,16 @@ Real-time section is dedicated for files with a real-time attribute bit set, and
 
 When created on striped RAID\footnote{Striped RAID is e.g. RAID 0, where logically sequential data are split into a number of physical blocks and written on multiple disks interleaved. For a RAID 0 on two drives it means that odd blocks are located on one drive and even blocks on the other.}, XFS can be informed about it and align all allocations and size to the stripe unit to maximize speed.
 
+As a native Unix filesystem, XFS uses {\em inodes} as a data structure to save information about files and directories. The first of the three parts of an inode (see figure~\ref{fig:xfs:inode}), core, contains the basic information, describing what the inode represents. Some example of the data in this field is the id of the user and group owning this inode, size and modification time.
+
+\begin{figure}
+  \centering
+ \includegraphics[width=12cm,keepaspectratio]{fig/inode} % Or .pdf
+ \caption{On-disk inode~\cite[Ch. 4]{xfsStructure}.}
+\label{fig:xfs:inode}
+\end{figure}
+
+The second part, {\tt di\_u}, or data fork, is for data for any specific type the inode can be; a directory, a symbolic link, a regular file, etc. For a directory, it will contain the entries in the directory. And the third member of each inode, {\tt di\_a}, is reserved for extended attributes (abbreviated {\tt xattr}), which are used for example by SELinux.
 
 %======================================================================
 \section{mkfs.xfs}\label{chap:xfs:mkfs}
@@ -80,4 +90,5 @@ mkfs.xfs [ -b block_size ] [ -d data_section_options ] [ -f ]
 \end{lstlisting}
 
 An example of such usage is {\tt mkfs.xfs -f /dev/sda1}. This simple example creates a XFS filesystem on device {\tt /dev/sda1} even if an existing filesystem existed there -- thus the {\tt -f} (as force) flag. For the whole description of mkfs.xfs usage it is better to refer to mkfs.xfs manual page. What is important to note here is that parsing the input arguments and computing inner values based on these inputs makes most of the circa 3,500\footnote{Before the merge of the last part of my changes. With these changes, mkfs has over 4,000 lines.} lines of code.
+
 
