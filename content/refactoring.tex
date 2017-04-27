@@ -228,8 +228,31 @@ watch only for input validation, whether {\tt mkfs.xfs} correctly accepts
 or refuses any given combination of options and values.
 
 Size of this patchset is 19 patches and the total changes are:
-\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the first patchset~\cite{finalPatchset1}.}]
-include/Makefile        |    5 +-
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the first patchset~\cite{finalPatchset1}. Note: Git attributes changes only to the first author of each commit.}]
+Dave Chinner (15):
+  xfsprogs: use common code for multi-disk detection
+  mkfs: sanitise ftype parameter values.
+  mkfs: Sanitise the superblock feature macros
+  mkfs: validate all input values
+  mkfs: factor boolean option parsing
+  mkfs: validate logarithmic parameters sanely
+  mkfs: structify input parameter passing
+  mkfs: getbool is redundant
+  mkfs: use getnum_checked for all ranged parameters
+  mkfs: add respecification detection to generic parsing
+  mkfs: table based parsing for converted parameters
+  mkfs: merge getnum
+  mkfs: encode conflicts into parsing table
+  mkfs: add string options to generic parsing
+  mkfs: don't treat files as though they are block devices
+
+Jan Tulak (4):
+  mkfs: move spinodes crc check
+  mkfs: unit conversions are case insensitive
+  mkfs: add optional 'reason' for illegal_option
+  mkfs: conflicting values with disabled crc should fail
+
+ include/Makefile        |    5 +-
  include/xfs_multidisk.h |   73 ++
  libxfs/init.c           |    6 +
  libxfs/linux.c          |   11 +-
@@ -240,7 +263,9 @@ include/Makefile        |    5 +-
  mkfs/xfs_mkfs.c         | 1983 +++++++++++++++++++++++++++++------------------
  mkfs/xfs_mkfs.h         |   89 ---
  repair/xfs_repair.c     |   44 +-
-11 files changed, 1417 insertions(+), 901 deletions(-)
+ 11 files changed, 1417 insertions(+), 901 deletions(-)
+ create mode 100644 include/xfs_multidisk.h
+ delete mode 100644 mkfs/xfs_mkfs.h
 \end{lstlisting}
 
 %_____________________________________________________
@@ -464,8 +489,34 @@ this position instead of David Chinner.
 
 Size of this patchset in the first RFC is 22 patches and the total changes are:
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the second patchset~\cite{secondSetRFC}.}]
+Jan Tulak (22):
+  mkfs: remove intermediate getstr followed by getnum
+  mkfs: merge tables for opts parsing into one table
+  mkfs: extend opt_params with a value field
+  mkfs: change conflicts array into a table capable of cross-option
+    addressing
+  mkfs: add a check for conflicting values
+  mkfs: add cross-section conflict checks
+  mkfs: Move opts related #define to one place
+  mkfs: move conflicts into the table
+  mkfs: change conflict checks to utilize the new conflict structure
+  mkfs: change when to mark an option as seen
+  mkfs: add test_default_value into conflict struct
+  mkfs: expand conflicts declarations to named declaration
+  mkfs: remove zeroed items from conflicts declaration
+  mkfs: rename defaultval to flagval in opts
+  mkfs: replace SUBOPT_NEEDS_VAL for a flag
+  mkfs: Change all value fields in opt structures into unions
+  mkfs: use old variables as pointers to the new opts struct values
+  mkfs: prevent sector/blocksize to be specified as a number of blocks
+  mkfs: subopt flags should be saved as bool
+  mkfs: move uuid empty string test to getstr()
+  mkfs: remove duplicit checks
+  mkfs: prevent multiple specifications of a single option
+
  mkfs/xfs_mkfs.c | 2952 +++++++++++++++++++++++++++++++++++--------------------
  1 file changed, 1864 insertions(+), 1088 deletions(-)
+
 \end{lstlisting}
 
 Together, these two issues caused that despite my urging, there wasn't much
@@ -550,7 +601,58 @@ Because even this smaller set was not fully accepted until the end of April,
 but some minor work was still required, I further focused on other parts of
 this work and did not intend to use the second set in the tests in this work.
 
+Size of the smaller set is:
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the first part of the second set after its breaking into smaller parts~\cite{secondSetSplitFirst}.}]
+Jan Tulak (12):
+  mkfs: Save raw user input field to the opts struct
+  mkfs: rename defaultval to flagval in opts
+  mkfs: remove intermediate getstr followed by getnum
+  mkfs: merge tables for opts parsing into one table
+  mkfs: extend opt_params with a value field
+  mkfs: create get/set functions for opts table
+  mkfs: save user input values into opts
+  mkfs: replace variables with opts table: -b,d,s options
+  mkfs: replace variables with opts table: -i options
+  mkfs: replace variables with opts table: -l options
+  mkfs: replace variables with opts table: -n options
+  mkfs: replace variables with opts table: -r options
+
+ mkfs/xfs_mkfs.c | 2457 ++++++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 1420 insertions(+), 1037 deletions(-)
+\end{lstlisting}
 
 
+%_____________________________________________________
+\subsection{Timeline and progress}
+%.....................................................
 
+\begin{itemize}
+	\item {\em June 2016} -- The first patchset is accepted and merged into
+		the repository, beginning of the work on the second set.
+	\item {\em August 2016} -- First draft of changes of the second set~\cite{secondSetPreRFC}.
+	\item {\em December 2016} -- RFC of the full second set. This gained just a little attention.
+	\item {\em March 2017} -- Second set without the RFC. This version attracted enough attention to be useful, and provided valuable feedback.
+	\item {\em March 2017} -- Vault conference in Boston. I met some other developers personally and debated some of the changes. This helped to raise some attention towards my patches.
+	\item {\em April 2017} -- resubmitting only part of the second set with requested changes and setters/getters as an addition. This generated a lot of feedback.
+\end{itemize}
+
+
+%======================================================================
+\section{Summary}\label{chap:refactoring:summary}
+%----------------------------------------------------------------------
+
+Part of my changes was successfully merged into the project in time. However,
+some other patches gained the necessary attention too late and I couldn't fix
+or change all found issues before the deadline for this work. These changes
+will get merged eventually.
+
+I analysed the difficulties in an attempt to avoid these delays in the future.
+My hypothesis is that the set as a whole was too big and complex, which effect
+was multiplied by unintentionally not adhering to unwritten standards. A
+proposed process change for further iterations is to send few smaller patches
+more often and wait with other changes depending on those submitted until they
+are accepted.
+
+The higher activity on the last patchset, which was just a subset of the second
+big set, seems to confirm this hypothesis, however, more iterations is needed.
 
