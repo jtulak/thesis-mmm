@@ -1,4 +1,9 @@
+%==================================
+% (c) Jan Tulak, 2017
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter{Refactoring of mkfs.xfs} \label{chap:refactoring}
+%----------------------------------------------------------------------
 
 The idea of changes described in this work is to rewrite a complex and
 chaotic code for parsing user input with a table that holds values like
@@ -16,7 +21,9 @@ wouldn't have to maintain this so many patches up to date. There are two
 main patchsets which are accompanied by few small and enclosed changes that
 could be easily submitted independently.
 
+%======================================================================
 \section{Development processes}\label{chap:refactoring:processes}
+%----------------------------------------------------------------------
 
 At first I will briefly describe the development processes and tools used for
 xfsprogs, which are similar as tools and processes used for Linux Kernel
@@ -45,7 +52,9 @@ community and is part of Linux Kernel source. Such a rules has their
 meaning and helps to keep a consistent style throughout xfsprogs, but the
 fact that they are not documented causes unnecessary issues and delays.
 
+%======================================================================
 \section{Initial codebase}\label{chap:refactoring:initialcodebase}
+%----------------------------------------------------------------------
 
 Almost all the important code I was changing is located in {\tt
 mkfs/xfs\_mkfs.c} file. The code before the first patchset was merged can
@@ -165,7 +174,10 @@ and lose user's data. Even if such a case was detected and the specific
 error fixed, the minimal code reuse meant that other options could still be
 susceptible to the same or similar issue.
 
+%======================================================================
 \section{First patchset}\label{chap:refactoring:first}
+%----------------------------------------------------------------------
+
 As is shown in~\ref{chap:refactoring:initialcodebase}, the situation was not ideal and the
 state of the code led to many known issues. David Chinner, then maintainer
 of XFS, presented a set of patches as an RFC\footnote{Request for comment -
@@ -231,7 +243,9 @@ include/Makefile        |    5 +-
 11 files changed, 1417 insertions(+), 901 deletions(-)
 \end{lstlisting}
 
+%_____________________________________________________
 \subsection{Timeline and progress}
+%.....................................................
 
 \begin{itemize}
 	\item {\em November 2013} -- Dave Chinner submits his RFC.
@@ -249,7 +263,10 @@ include/Makefile        |    5 +-
 		the repository.
 \end{itemize}
 
+%_____________________________________________________
 \subsection{Description of important changes}
+%.....................................................
+
 The key part of this patchset is the creation of {\tt opt\_params} table.
 It is a structure that is holds all the important values for a specific
 option in one place, easily acessible and consistent across whole file.
@@ -431,7 +448,9 @@ Also, it was possible to specify conflicts only between suboptions of a
 single option.
 
 
+%======================================================================
 \section{Second patchset}\label{chap:refactoring:second}
+%----------------------------------------------------------------------
 
 Once this change was merged and provided a stable point so I didn't have to
 keep so much code in my own local repository up to date with upstream, I
@@ -443,19 +462,93 @@ usually reviewed only by the maintainer when nobody else starts it. In this
 case, however, the maintainer changed in late December -- Eric Sandeen took
 this position instead of David Chinner.
 
-Together, these two issues caused that despite my urging, there wasn't much
-reaction until March, when I submitted another version, this time
-intentionally not as an RFC. I also mentioned to few people that this is
-part of my thesis.
-
-The review of the second set revealed many disputable points and it become
-apparent that these patches will need further changes.
-The second part of my changes is focused mostly on conflicts detection and allows for almost all checks to be removed from the code as ad-hoc solutions, as the new structures and functions take care of them automatically. Any programmer making a change just has to correctly specify values in a {\tt struct opt\_params}, write in a list of conflicting options, and the validation of the new option is guaranteed to work correctly and seamlessly.
-
 Size of this patchset in the first RFC is 22 patches and the total changes are:
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the second patchset~\cite{secondSetRFC}.}]
  mkfs/xfs_mkfs.c | 2952 +++++++++++++++++++++++++++++++++++--------------------
  1 file changed, 1864 insertions(+), 1088 deletions(-)
 \end{lstlisting}
+
+Together, these two issues caused that despite my urging, there wasn't much
+reaction until March. In March I submitted another version, this time
+intentionally not as an RFC. I also mentioned to few people that this is
+part of my thesis.
+
+The review of the second set revealed many disputable points and it become
+certain that these patches will need further changes. The second part of
+my changes is focused mostly on conflicts detection and allows for almost
+all checks to be removed from the code as ad-hoc solutions, as the new
+structures and functions take care of them automatically. Any programmer
+making a change just has to correctly specify values in a {\tt struct
+opt\_params}, write in a list of conflicting options, and the validation of
+the new option is guaranteed to work correctly and seamlessly.
+
+To make the process faster, I decided to split this patchset into multiple
+smaller ones, which can get fixed, reviewed and merged faster. The first
+group focused on extending the options table not only for encoding validity
+range and basic conflicts, but also for user input.
+
+Key implemented functions in these patches are {\tt parse|get|set\_conf\_val}
+-- a set of functions to manipulate the user input values. This is a key
+difference from the RFC, where the values were manipulated as pointers to the
+table.
+
+Compare code examples \ref{lst:refactoring:aliasing} and
+\ref{lst:refactoring:getter}.  The first example with aliases keeps a lot of
+seemingly unconnected variables in the code where the programmer doesn't know
+where exactly the pointer leads to. And even if he finds the first assignment,
+it is possible to mistakenly override the target address. In the second
+example, with setters and getters, it is apparent on the first glance, where
+the value is to be written or read. And it is impossible to mistakenly alter
+the target address.
+
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=C, numbers=none, numberstyle=\tiny\color{black},
+label={lst:refactoring:aliasing},
+caption={Pointer aliases in RFC of the second set.}]
+long long *agcount = &opts[OPT_D].subopt_params[D_AGCOUNT].value;
+
+// ... lines skipped
+*agcount = foo(bar);
+
+// ... lines skipped
+if (*agcount < SOME_CONSTANT)
+	// do something
+\end{lstlisting}
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=C, numbers=none, numberstyle=\tiny\color{black},
+label={lst:refactoring:getter},
+caption={Setters and getters in later version of the second set.}]
+set_conf_val(OPT_D, D_AGCOUNT, foo(bar));
+
+// ... lines skipped
+if (get_conf_val(OPT_D, D_AGCOUNT) < SOME_CONSTANT)
+	// do something
+\end{lstlisting}
+
+Furthermore, this approach allows for a verification of all values saved into
+the table for the whole run of the program. However, after attempting to
+implement this feature, I found out this is not possible to add at this moment.
+While we know valid bounds for user input values, some of these values are then
+recomputed and can get out of these bounds, while still being valid. An example
+of this is {\tt L\_SUNIT}\footnote{{\tt L\_SUNIT} specifies the alignment of
+log writes.}, which is specified as a number of 512-byte blocks. However, it is
+later multiplied by the 512, at which moment it can get out of the valid bounds
+specified for input.
+
+Proposed but not yet implemented solution is to utilize the existing
+infrastructure and create a new pseudo option for the table, which would not be
+visible for the end user, but would hold all the internal variables for which
+bound range (or any other condition, like being power of 2) can be applied.
+This topic was briefly discussed in replies to one of the patches in this
+set~\cite{secondSetSplitOtherVars}, because one of the other developers, Luis
+R. Rodriguez, has a work in progress that requires such infrastructure to be
+implemented.
+
+
+
+
+
 
 
