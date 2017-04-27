@@ -92,3 +92,27 @@ mkfs.xfs [ -b block_size ] [ -d data_section_options ] [ -f ]
 An example of such usage is {\tt mkfs.xfs -f /dev/sda1}. This simple example creates a XFS filesystem on device {\tt /dev/sda1} even if an existing filesystem existed there -- thus the {\tt -f} (as force) flag. For the whole description of mkfs.xfs usage it is better to refer to mkfs.xfs manual page. What is important to note here is that parsing the input arguments and computing inner values based on these inputs makes most of the circa 3,500\footnote{Before the merge of the last part of my changes. With these changes, mkfs has over 4,000 lines.} lines of code.
 
 
+%======================================================================
+\section{xfstests}\label{chap:xfs:xfstests}
+%----------------------------------------------------------------------
+
+The project named {\em xfstests}, or also FSQA, is a framework and a
+collection of test suites written in Bash. Most of the tests run some
+filesystem utilities and either validates whether some part of the FS
+ecosystem behaves correctly, or tries to replicate a specific known issue
+to prevent regressions.
+
+The tests are grouped into multiple categories according to the tested filesystem:
+
+{\tt btrfs, cifs, ext4, f2fs, generic, ocfs2, overlay, shared, udf, xfs}
+
+A grouping orthogonal to these categories assigns each test into one or
+more groups that allows for finer tuning of which tests should be
+run\footnote{An example of the groups: {\tt mkfs, quick, all, dangerous,
+auto, quota, attr, symlink, \ldots}.}
+
+These tests do not analyse any program (either its source code, or the
+compiled binary), but only the results of running these programs, be it a
+created filesystem, or printed messages. Because xfstests do not employ any
+formal techninque and focus on completely different means of testing, it is
+not compared with other tools in this work.
