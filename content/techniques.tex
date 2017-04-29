@@ -2,9 +2,10 @@
 % (c) Jan Tulak, 2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Useful Techniques and Models}\label{chap:techniques}
+\chapter{Used Techniques and procedures}\label{chap:techniques}
 %----------------------------------------------------------------------
 
+\TODO{Rewrite the introduction of this chapter once the tests are done.}
 In this chapter, we discuss which techniques and models of formal analysis and verification are useful for the code of {\tt mkfs.xfs}. Let us at first define important constraints that are limiting or directing our choice.
 
 First of all, we are analysing a single-threaded application. This greatly reduces the state space and means that we also can use methods that do not allow for concurrency. On the other side, given that the program accepts user input, some variables has an infinite number of potential values and any method based on state space checks has to cope with this fact.
@@ -18,17 +19,72 @@ Thus, to be able to compare the various tools directly, some of the tools are ru
 A potentially interesting comparison could be if there exist some tools using neural networks and deep learning as an integral part of their algorithms. For example as a heuristic to drive the selection of inference rules in theorem proving, or for spotting error patterns~\footnote{Some attempts in modelling a code are hinted in {\em On the Naturalness of Software} by Abram Hindle: \url{http://dl.acm.org/citation.cfm?id=2902362}.}
 % TODO http://dl.acm.org/citation.cfm?id=2902362 download and read... search for deep learning sources
 
-List of tools I intend to use (in no particular order): Coverity, CPAChecker, some Lint-like tools, CppChecker.
+List of tools I intend to use (in no particular order): Coverity,
+	CPAChecker, some Lint-like tools, CppCheck and analysis in GCC itself.
 
 
 %======================================================================
 \section{Testing Environment}\label{chap:techniques:env}
 %----------------------------------------------------------------------
 
-The tools were run in a Docker container of Fedora Linux 25. The use of
-containers ensures a clean and identical environment for every tool and every
-run.
+The tools were run in a Docker container\footnote{Simply stated, a
+	container is an image that has been started, similar to the
+		difference between a running virtual machine and its
+		on-disk virtual HDD image. Unlike virtualization,
+		containers are only processes isolated from the rest of the
+system using Kernel capabilities, like {\em cgroups} or {\em chroot}.
+Docker is a specific implementation~\cite{docker}} based on Fedora Linux
+25. The use of containers ensures a clean and identical environment for
+every tool and every run. Images with CPAChecker and CppCheck are published
+in Docker Hub and all the recipes to build and use them are provided with
+this work. Image with Coverity could not be published, because it contains
+confident information\footnote{I had an access to Red Hat Coverity license
+server as a Red Hat employee. However, the server information and some tools
+	Red Hat provided with Coverity are considered confidential. }.
 
-\TODO{More details, links to the Docker images used...}
+%_____________________________________________________
+\subsection{CPAChecker}
+%.....................................................
+Docker image: {\tt jtulak/cpacheck}~\cite{dockerCPAChecker}
 
+CPAChecker can't be run on a full source code, but requires
+preprocessing~\cite{cpacheckerGettingStarted}, which has to be partially
+remade for every tested revision (depending on what and how much changed),
+       only selected commits were tested.
+%_____________________________________________________
+\subsection{CppCheck}
+%.....................................................
+Docker image: {\tt jtulak/cppcheck}~\cite{dockerCPPCheck}
+
+CppCheck is also used in {\em Codacy}, an automated code review application
+with Github integration. Results from Codacy are included for comparison.
+
+Because CppCheck doesn't need preprocessed code, it was reasonable to use
+it for every commit in my changes.
+
+When running this tool, default configuration was used, and all types of
+messages were enabled. No custom rules were used and the invocation of
+CppCheck on whole {\tt xfsprogs/mkfs/} directory was:
+
+{\tt cppcheck --enable=all mkfs/}
+
+\TODO{Find some non-default rules for cppcheck and test with them? Or if
+	some other tool finds anything, try to write a rule for that
+		issue.}
+
+
+%_____________________________________________________
+\subsection{Coverity}
+%.....................................................
+Coverity was used both manually in a Docker container, and automatically,
+using the public Coverity service for open source projects, which is part
+of standard xfsprogs development process, to compare the results between
+those two instances.
+
+%_____________________________________________________
+\subsection{GCC}
+%.....................................................
+The {\em GNU project C and C++ compiler} is used for compiling xfsprogs and
+it has some static analysis capabilities. The only difference in its use
+from standard configuration is to use the most strict reporting.
 
