@@ -13,11 +13,11 @@ well documented and easily readable and extendable. This structure should
 hold also the user-entered values and limit code and variables duplication
 as much as possible.
 
-During the development, I had to repeatedly solve conflicts with changes
-from other developers that got merged into xfsprogs while I was still
+During the development, we had to repeatedly solve conflicts with changes
+from other developers that got merged into xfsprogs while we were still
 working on my changes. That led me to cut the work into multiple parts.
-That way, others could benefit from changes that were already done and I
-wouldn't have to maintain this so many patches up to date. There are two
+That way, others could benefit from changes that were already done and we
+would not have to maintain this so many patches up to date. There are two
 main patchsets which are accompanied by few small and enclosed changes that
 could be easily submitted independently.
 
@@ -25,7 +25,7 @@ could be easily submitted independently.
 \section{Development processes}\label{chap:refactoring:processes}
 %----------------------------------------------------------------------
 
-At first I will briefly describe the development processes and tools used for
+At first we will briefly describe the development processes and tools used for
 xfsprogs, which are similar as tools and processes used for Linux Kernel
 development.
 
@@ -56,7 +56,7 @@ fact that they are not documented causes unnecessary issues and delays.
 \section{Initial codebase}\label{chap:refactoring:initialcodebase}
 %----------------------------------------------------------------------
 
-Almost all the important code I was changing is located in {\tt
+Almost all the important code we were changing is located in {\tt
 mkfs/xfs\_mkfs.c} file. The code before the first patchset was merged can
 be accessed in the project's Git repository as a version 4.6. Git revision
 hash for this version is {\tt 09033e35}. In this revision, the parsing of
@@ -118,8 +118,8 @@ while ((c = getopt(argc, argv, "b:d:i:l:L:m:n:KNp:qr:s:CfV")) != EOF) {
 \end{lstlisting}
 
 While the {\tt -f} option is simple, in case of {\tt -b
-log=XX}\footnote{Here and on other places, I'm using the block option as an
-example, because this option has only two suboptions, so I can show it in
+log=XX}\footnote{Here and on other places, the block option is used as an
+example, because this option has only two suboptions, so it can be shown in
 full if needed.} we can see how the parsing can get complex. The code tests
 if the value is not empty and if it is, it raises an error. Then it tests
 whether this specific option was already used, because repeated
@@ -198,13 +198,13 @@ susceptible to the same or similar issue.
 \section{First patchset}\label{chap:refactoring:first}
 %----------------------------------------------------------------------
 
-As is shown in~\ref{chap:refactoring:initialcodebase}, the situation was not ideal and the
+As is shown \Cref{chap:refactoring:initialcodebase}, the situation was not ideal and the
 state of the code led to many known issues. David Chinner, then maintainer
 of XFS, presented a set of patches as an RFC\footnote{Request for comment -
 	signalling, that the presented patches are not meant to be merged,
 but the author wants to hear other people's thoughts about these changes.}
 in November 2013~\cite{davidsPatches} in an attempt to raise a discussion.
-However, nobody joined him and David Chinner himself didn't continue in
+However, nobody joined him and David Chinner himself did not continue in
 pressing this matter for few years. Here is an excerpt from his RFC:
 
 \begin{displayquote}
@@ -230,10 +230,10 @@ many variables is messy and nasty. IOWs, it lays the groundwork for
 factoring xfs\_mkfs.c into something more than a bunch of spagetti...
 \end{displayquote}
 
-When I joined the XFS team and began with the refactoring in
-2015~\cite{myFirstPatches}, I picked up this patchset and brought it up to
+When we joined the XFS team and began with the refactoring in
+2015~\cite{myFirstPatches}, we picked up this patchset and brought it up to
 date with the codebase that in some parts changed substantially in the two
-years. Once the patches were applicable for the current code, I began
+years. Once the patches were applicable for the current code, we began
 fixing functional issues and adding further changes.
 
 
@@ -247,8 +247,15 @@ in xfstests had to be updated and a new test was created, with the goal to
 watch only for input validation, whether {\tt mkfs.xfs} correctly accepts
 or refuses any given combination of options and values.
 
-Size of this patchset is 19 patches and the total changes are:
-\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the first patchset~\cite{finalPatchset1}. Note: Git attributes changes only to the first author of each commit.}]
+Size and commits of this patchset are described in
+\Cref{lst:refactoring:initialcodebase}. It is 19 patches that are
+grouped by the initial author, in this case David Chinner and Jan Ťulák.
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git
+statistics for the first patchset~\cite{finalPatchset1}. Note: Git
+attributes changes only to the first author of each commit.},
+label={lst:refactoring:initialcodebase}]
 Dave Chinner (15):
   xfsprogs: use common code for multi-disk detection
   mkfs: sanitise ftype parameter values.
@@ -294,10 +301,10 @@ Jan Tulak (4):
 
 \begin{itemize}
 	\item {\em November 2013} -- Dave Chinner submits his RFC.
-	\item {\em May 2015} -- I'm beginning the work on this patchset.
+	\item {\em May 2015} -- We are beginning the work on this patchset.
 	\item {\em June 2015} -- The first published version. It contains
 		only minor changes except updating and fixing the most
-		serious errors. I'm getting the first feedback.
+		serious errors. We are getting the first feedback.
 	\item {\em March 2016} -- Another version submitted, this time with
 		more custom changes.
 	\item {\em April 2016} -- Further big changes. Some patches are
@@ -383,14 +390,14 @@ The {\tt subopt\_param} has the following members:
 
 \item[minval, maxval] {\em OPTIONAL}
     These options are used for automatic range check and they have to be
-    always used together in pair. If you don't want to limit the max value,
+    always used together in pair. If you do not want to limit the max value,
     use something like UINT\_MAX. If no value is given, then you must either
     supply your own validation, or refuse any value in the 'case
     X\_SOMETHING' block. If you forget to define the min and max value, but
     call a standard function for validating user's value, it will cause an
     error message notifying you about this issue.
 
-    (Said in another way, you can't have minval and maxval both equal
+    (Said in another way, you can not have minval and maxval both equal
     to zero. But if one value is different: minval=0 and maxval=1,
     then it is OK.)
 
@@ -403,11 +410,14 @@ The {\tt subopt\_param} has the following members:
 		
 \end{description}
 
-{\tt opt\_params} is instantiated for every option category, e.g. for {\tt -b} it is:
+{\tt opt\_params} is instantiated for every option category, e.g.
+\Cref{lst:refactoring:instantiation} shows instantiation for {\tt
+-b}.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=C, numbers=none, numberstyle=\tiny\color{black},
-caption= {Instantiation of the table for block options.}]
+caption= {Instantiation of the table for block options.},
+label={lst:refactoring:instantiation}]
 struct opt_params bopts = {
 	.name = 'b',
 	.subopts = {
@@ -444,12 +454,14 @@ simplified. For comparison, here is the nested loop from
 \ref{lst:refactoring:loopexample} code example after this patchset was
 applied. You can see that the section for {\tt B\_LOG} is now much cleaner
 (no branching, only few assignments) and the generic logic was moved away
-into a function shared with other options:
+into a function shared with other options as can be seen in
+\Cref{lst:refactoring:parsingAfterFirst}.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=C, numbers=none, numberstyle=\tiny\color{black},
 caption= {Part of option-parsing loop from mkfs.xfs after the first patch
-set.}]
+set.},
+label={lst:refactoring:parsingAfterFirst}]
 case 'b':
 	p = optarg;
 	while (*p != '\0') {
@@ -482,10 +494,10 @@ This was mitigated by automatic detection of whether the target is a
 regular file or a block device, and by changing the flow of the program on
 various places where the difference between file and device was important.
 
-However, there were still many issues that weren't addressed. The
+However, there were still many issues that were not addressed. The
 conflicting options were only enumerated, without any additional
 information, and thus the field was usable only for always conflicting
-options, like {\tt -b log|size} -- it didn't help with conditional conflicts.
+options, like {\tt -b log|size} -- it did not help with conditional conflicts.
 For example, checksums for metadata, enabled with {\tt -m crc}, works only
 on newer version of metadata format: {\tt -m crc -i attr=1} is conflicting,
 but {\tt -i attr=2} is not. Such tests still had to be done as before.
@@ -497,9 +509,9 @@ single option.
 \section{Second patchset}\label{chap:refactoring:second}
 %----------------------------------------------------------------------
 
-Once this change was merged and provided a stable point so I didn't have to
-keep so much code in my own local repository up to date with upstream, I
-began to work on the second set of changes. I submitted an
+Once this change was merged and provided a stable point so we did not have to
+keep so much code in my own local repository up to date with upstream, we
+began to work on the second set of changes. We submitted an
 RFC of these
 changes in December 2016~\cite{secondSetRFC}. Such a big and complex
 changes are something that most of the developers postpone, so it is
@@ -507,8 +519,12 @@ usually reviewed only by the maintainer when nobody else starts it. In this
 case, however, the maintainer changed in late December -- Eric Sandeen took
 this position instead of David Chinner.
 
-Size of this patchset in the first RFC is 22 patches and the total changes are:
-\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the second patchset~\cite{secondSetRFC}.}]
+Size of this patchset in the first RFC is 22 patches and the patches can be
+seen in \Cref{lst:refactoring:secondSet}.
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git
+statistics for the second patchset~\cite{secondSetRFC}.},
+label={lst:refactoring:secondSet}]
 Jan Tulak (22):
   mkfs: remove intermediate getstr followed by getnum
   mkfs: merge tables for opts parsing into one table
@@ -539,9 +555,9 @@ Jan Tulak (22):
 
 \end{lstlisting}
 
-Together, these two issues caused that despite my urging, there wasn't much
-reaction until March. In March I submitted another version, this time
-intentionally not as an RFC. I also mentioned to few people that this is
+Together, these two issues caused that despite my urging, there was not much
+reaction until March. In March we submitted another version, this time
+intentionally not as an RFC. We also mentioned to few people that this is
 part of my thesis.
 
 The review of the second set revealed many disputable points and it become
@@ -553,7 +569,7 @@ making a change just has to correctly specify values in a {\tt struct
 opt\_params}, write in a list of conflicting options, and the validation of
 the new option is guaranteed to work correctly and seamlessly.
 
-To make the process faster, I decided to split this patchset into multiple
+To make the process faster, we decided to split this patchset into multiple
 smaller ones, which can get fixed, reviewed and merged faster. The first
 group focused on extending the options table not only for encoding validity
 range and basic conflicts, but also for user input.
@@ -562,11 +578,12 @@ Most notable changes are functions {\tt parse|get|set\_conf\_val}
 -- a set of functions to manipulate the user input values. This is a key
 difference from the RFC. There the values were manipulated as pointers to the
 table, but other developers raised objections. Most notably Dave Chinner, who
-rebutted my worries about the use of setters and getters in a reply to my e-mail where I suggested them as another option~\cite{unifyTypes1, unifyTypes2}
+rebutted my worries about the use of setters and getters in a reply to my
+e-mail where we suggested them as another option~\cite{unifyTypes1, unifyTypes2}
 
 Compare code examples \ref{lst:refactoring:aliasing} and
 \ref{lst:refactoring:getter}.  The first example with aliases keeps a lot of
-seemingly unconnected variables in the code where the programmer doesn't know
+seemingly unconnected variables in the code where the programmer does not know
 where exactly the pointer leads to. And even if he finds the first assignment,
 it is possible to mistakenly override the target address. In the second
 example, with setters and getters, it is apparent on the first glance, where
@@ -600,7 +617,7 @@ if (get_conf_val(OPT_D, D_AGCOUNT) < SOME_CONSTANT)
 
 Furthermore, this approach allows for a verification of all values saved into
 the table for the whole run of the program. However, after attempting to
-implement this feature, I found out this is not possible to add at this moment.
+implement this feature, we found out this is not possible to add at this moment.
 While we know valid bounds for user input values, some of these values are then
 recomputed and can get out of these bounds, while still being valid. An example
 of this is {\tt L\_SUNIT}\footnote{{\tt L\_SUNIT} specifies the alignment of
@@ -618,12 +635,17 @@ R. Rodriguez, has a work in progress that requires such infrastructure to be
 implemented.
 
 Because even this smaller set was not fully accepted even the end of April,
-and adressing the issues other developers raised required too much time, I
+and adressing the issues other developers raised required too much time, we
 furtherfocused on the next part of
 this work and did not used the second patchset in formal analysis.
 
-Size of the smaller set is:
-\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git statistics for the first part of the second set after its breaking into smaller parts~\cite{secondSetSplitFirst}.}]
+Size of the smaller set can be seen in
+\Cref{lst:refactoring:firstSmallerGit}.
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Git
+statistics for the first part of the second set after its breaking into
+smaller parts~\cite{secondSetSplitFirst}.},
+label={lst:refactoring:firstSmallerGit}]
 Jan Tulak (12):
   mkfs: Save raw user input field to the opts struct
   mkfs: rename defaultval to flagval in opts
@@ -653,7 +675,7 @@ Jan Tulak (12):
 	\item {\em August 2016} -- First draft of changes of the second set~\cite{secondSetPreRFC}.
 	\item {\em December 2016} -- RFC of the full second set. This gained just a little attention.
 	\item {\em March 2017} -- Second set without the RFC. This version attracted enough attention to be useful, and provided valuable feedback.
-	\item {\em March 2017} -- Vault conference in Boston. I met some other developers personally and debated some of the changes. This helped to raise some attention towards my patches.
+	\item {\em March 2017} -- Vault conference in Boston. We met some other developers personally and debated some of the changes. This helped to raise some attention towards my patches.
 	\item {\em April 2017} -- resubmitting only part of the second set with requested changes and setters/getters as an addition. This generated a lot of feedback.
 \end{itemize}
 
@@ -662,13 +684,13 @@ Jan Tulak (12):
 \section{Summary}\label{chap:refactoring:summary}
 %----------------------------------------------------------------------
 
-Part of my changes was successfully merged into the project in time. However,
-some other patches gained the necessary attention too late and I couldn't fix
-or change all found issues before the deadline for this work. These changes
-will get merged eventually.
+Part of the changes was successfully merged into the project in time.
+However, some other patches gained the necessary attention too late and all
+the found issues could not be fixed or changed before the deadline for this
+work. These changes will get merged eventually.
 
-I analysed the difficulties in an attempt to avoid these delays in the future.
-My hypothesis is that the set as a whole was too big and complex, which effect
+The difficulties were analysed in an attempt to avoid these delays in the future.
+Our hypothesis is that the set as a whole was too big and complex, which effect
 was multiplied by unintentionally not adhering to unwritten standards. A
 proposed process change for further iterations is to send few smaller patches
 more often and wait with other changes depending on those submitted until they

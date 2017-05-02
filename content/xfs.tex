@@ -46,7 +46,7 @@ As each Allocation Group is a de facto standalone filesystem, each contains
 the superblock and block and inode allocations and the only global
 information, maintained by the first (primary) AG is free space and total
 inode counts across the whole filesystem as can be seen
-on figure~\ref{fig:xfs:primaryAG}.
+on \Cref{fig:xfs:primaryAG}.
 
 \begin{figure}
   \centering
@@ -59,7 +59,7 @@ Real-time section is dedicated for files with a real-time attribute bit set, and
 
 When created on striped RAID\footnote{Striped RAID is e.g. RAID 0, where logically sequential data are split into a number of physical blocks and written on multiple disks interleaved. For a RAID 0 on two drives it means that odd blocks are located on one drive and even blocks on the other.}, XFS can be informed about it and align all allocations and size to the stripe unit to maximize speed.
 
-As a native Unix filesystem, XFS uses {\em inodes} as a data structure to save information about files and directories. The first of the three parts of an inode (see figure~\ref{fig:xfs:inode}), core, contains the basic information, describing what the inode represents. Some example of the data in this field is the id of the user and group owning this inode, size and modification time.
+As a native Unix filesystem, XFS uses {\em inodes} as a data structure to save information about files and directories. The first of the three parts of an inode (see \Cref{fig:xfs:inode}), core, contains the basic information, describing what the inode represents. Some example of the data in this field is the id of the user and group owning this inode, size and modification time.
 
 \begin{figure}
   \centering
@@ -76,7 +76,7 @@ The second part, {\tt di\_u}, or data fork, is for data for any specific type th
 
 This chapter describes in a greater detail the mkfs.xfs program itself, located
 in file {\tt mkfs/mkfs\_xfs.c}, from user point of view. For information about
-its implementation, see chapter~\ref{chap:refactoring:initialcodebase}. This
+its implementation, see \Cref{chap:refactoring:initialcodebase}. This
 tool creates a new XFS filesystem with given properties. It is, as is usual for
 core Unix utilities, a non-interactive program which accepts multiple arguments
 when called and prints out the properties of the newly created filesystem if

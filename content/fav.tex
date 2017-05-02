@@ -8,7 +8,7 @@ As the role of computers in human society is growing in ever faster pace, the co
 
 Or consider the recent advances in the area of autonomous vehicles. Where an error in smartphones can only deprive us of an information, or provide an incorrect one, an error in a self-driving car can cause it to swerve into a wall with dire consequences for the passengers.
 
-Common testing techniques, despite advances in this field, are still mostly reactive and can detect only known errors, for which a test was written, and can't provide a guarantee of correctness. That is, they can tell that "none of these specified errors happened," but can't tell whether the system is really free of errors with respect to a specification.
+Common testing techniques, despite advances in this field, are still mostly reactive and can detect only known errors, for which a test was written, and can not provide a guarantee of correctness. That is, they can tell that "none of these specified errors happened," but can not tell whether the system is really free of errors with respect to a specification.
 
 Formal methods, with roots in mathematical areas like theorem proving, on the other side frequently has the power to verify the correctness. But unlike the common testing techniques, and despite an interest of the industry, they are not yet widely used. A notable exception to this is a {\em static analysis}, which, in some of its weaker forms, is becoming a part of integrated development environments (IDE) like Xcode or Eclipse~\cite{xcodeAnalysis}.
 
@@ -16,7 +16,7 @@ A part of the reason for the small adoption of formal methods is their complexit
 
 By the term {\em formal analysis}, we describe methods for answering questions other than whether the tested system is free of errors with respect to some specification. That is, it includes questions like whether the program is guaranteed to always terminate if a buffer size is bound and so on.
 
-{\em Formal verification} then denotes methods capable of proving errorlessness of the given system with respect to correctness specification. {\em Completeness} of a method is a property guaranteeing that it won't raise a false alarm, while if a method that is {\em sound} terminates and tells that there are no errors, the system is indeed correct.
+{\em Formal verification} then denotes methods capable of proving errorlessness of the given system with respect to correctness specification. {\em Completeness} of a method is a property guaranteeing that it will not raise a false alarm, while if a method that is {\em sound} terminates and tells that there are no errors, the system is indeed correct.
 
 In the following parts of this work, we will first discuss some of the formal techniques (the rest of this chapter) and then also their usefulness on a real, production code in the chapter~\nameref{chap:techniques}. We will look not only on their result, but also on the cost of using them, both in timew and expertise necessary for their correct use.
 
@@ -37,9 +37,9 @@ Let us now look more in the detail on each of these methods and on their impleme
 \subsection{Error patterns}
 %.....................................................
 
-Tools using it: Lint~\cite{KrenaVojnarOverview} (and it's followers), cppcheck\footnote{I'm not sure about this and didn't found it cited anywhere, but from its code, it looks like they search for error patterns.}
+Tools using it: Lint~\cite{KrenaVojnarOverview} (and it's followers), cppcheck\footnote{We are not sure about this and did not found it cited anywhere, but from its code, it looks like they search for error patterns.}
 
-{\em Error patterns} detection is a rather wide array of different techniques and methods with a common goal: To detect more or less frequent type of errors. The great advantage of this class of methods is that they usually don't require any deeper knowledge, are fully automated and can very fast. Their disadvantages are that they are limited to a very specific kind of errors\footnote{Basically, every error pattern needs is own filter and only some kinds of error patterns are generic enough to be shipped within the tool. Consider a support for usage of a library. It makes sense to watch for patterns in usage of {\tt stdlib.h}, but how it should know patterns in a custom library? And even if the specific library is publicly available, including everything is impossible. Many tools allow for providing of custom definitions of these patterns, but from a personal experience, they are rarely used.} and suffers false positives.
+{\em Error patterns} detection is a rather wide array of different techniques and methods with a common goal: To detect more or less frequent type of errors. The great advantage of this class of methods is that they usually does not require any deeper knowledge, are fully automated and can very fast. Their disadvantages are that they are limited to a very specific kind of errors\footnote{Basically, every error pattern needs is own filter and only some kinds of error patterns are generic enough to be shipped within the tool. Consider a support for usage of a library. It makes sense to watch for patterns in usage of {\tt stdlib.h}, but how it should know patterns in a custom library? And even if the specific library is publicly available, including everything is impossible. Many tools allow for providing of custom definitions of these patterns, but from a personal experience, they are rarely used.} and suffers false positives.
 
 An example of the approaches used in this class of static analysis is a detection of matching pairs of functions. For example, any {\tt open()} call should be later followed with one {\tt close()} in every possible path. Or a state machine can be used to detect missing delimiter between statements or a missing {\tt break} in a {\tt switch}~\cite{dynamine}.
 
@@ -108,7 +108,7 @@ Tools using it: RuleBase~\cite{KrenaVojnarOverview}, Incisive Verifier~\cite{Kre
 
 {\em Model checking} is an algorithmic mean of checking whether the given system is correct with regards to any given property through systematic exploring of state space of this system. The properties are usually specified in some temporal logic like LTL, CTL, CTL* or $\mu$-calculus.
 
-The advantages of {\em model checking} are that it can be fully automated, is rather universal, doesn't require a deep knowledge for usage and if it finds an error, it can generate a path leading to the case, which is useful for repairs.
+The advantages of {\em model checking} are that it can be fully automated, is rather universal, does not require a deep knowledge for usage and if it finds an error, it can generate a path leading to the case, which is useful for repairs.
 
 However, it also has two big disadvantages. It requires a model of the environment for the system and suffers {\em state space explosion}. The number of reachable space grows exponentially -- consider a 32bit variable, which has $2^{32}$ possible values, which equals states. That means that $n$ of such variables equals $2^{32\times n}$ states. The result is that any attempt in a practical use of {\em model checking} has to cope with this state space explosion.
 
@@ -119,9 +119,9 @@ However, it also has two big disadvantages. It requires a model of the environme
 \label{fig:fav:dinning}
 \end{wrapfigure}
 
-The methods used for this include {\em symmetry reduction} in cases where it is not important which specific entity (if there is more entities of the same type is in a specific state). See figure~\ref{fig:fav:dinning} for an example of symmetry in the well known dinning philosophers problem.
+The methods used for this include {\em symmetry reduction} in cases where it is not important which specific entity (if there is more entities of the same type is in a specific state). See \Cref{fig:fav:dinning} for an example of symmetry in the well known dinning philosophers problem.
 
-Other solutions can be to use only one of many possible paths for the ordering of concurrent actions that are independent of each other and compress the size of states by using pointers to the previous state for values that didn't change. Or the tool can evaluate the properties at the same time when a new state is generated, and stop immediately once it is clear that this prefix cannot be accepted by the automata denoting correctness specification.
+Other solutions can be to use only one of many possible paths for the ordering of concurrent actions that are independent of each other and compress the size of states by using pointers to the previous state for values that did not change. Or the tool can evaluate the properties at the same time when a new state is generated, and stop immediately once it is clear that this prefix cannot be accepted by the automata denoting correctness specification.
 
 
 %.......................
@@ -136,6 +136,6 @@ An open-source tool and a framework for an analysis of programs in C language. I
 %----------------------------------------------------------------------
 Tools using it: VCC~\cite{KrenaVojnarOverview}, ESC/Java2~\cite{KrenaVojnarOverview}, VS3~\cite{KrenaVojnarOverview}
 
-{\em Theorem proving} is similar to mathematical deduction, where we get a proof from an initial set of axioms. It also shares advantages and disadvantages with its purely mathematical counterpart. On the one side, it is really universal, but on the other side, it can't provide a {\em counterexample} (a path to an error), but just says yes/no, and is only semiautomatic. The tools can correctly apply inference rules, but their choice is up to the user. Thus, an insufficiently skilled user may not be able to prove that the system is correct even if there are no errors in the system.
+{\em Theorem proving} is similar to mathematical deduction, where we get a proof from an initial set of axioms. It also shares advantages and disadvantages with its purely mathematical counterpart. On the one side, it is really universal, but on the other side, it can not provide a {\em counterexample} (a path to an error), but just says yes/no, and is only semiautomatic. The tools can correctly apply inference rules, but their choice is up to the user. Thus, an insufficiently skilled user may not be able to prove that the system is correct even if there are no errors in the system.
 
 
