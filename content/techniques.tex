@@ -5,7 +5,6 @@
 \chapter{Used Techniques and procedures}\label{chap:techniques}
 %----------------------------------------------------------------------
 
-\TODO{Rewrite the introduction of this chapter once the tests are done.}
 In this chapter, we discuss which techniques and models of formal analysis and verification are useful for the code of {\tt mkfs.xfs}. Let us at first define important constraints that are limiting or directing our choice.
 
 First of all, we are analysing a single-threaded application. This greatly reduces the state space and means that we also can use methods that do not allow for concurrency. On the other side, given that the program accepts user input, some variables has an infinite number of potential values and any method based on state space checks has to cope with this fact.
@@ -16,21 +15,22 @@ and used tools and gradually move from these production-ready, easy to use
 solutions to tools requiring more of user input.
 
 Some tools will be used multiple times, because while, for example, {\em
-	Coverity Scan} can be used on the whole source of {\em xfsprogs}, other
+	Coverity} can be used on the whole source of {\em xfsprogs}, other
 	tools like {\em CPAChecker} require modelling of the environment and so
-	for practical reasons, they will be run only on an extracted part of
-{\tt mkfs\_xfs.c}, where things like access to disk devices are removed to
-create a maximally self-contained code. This means that we will not be able to
-detect errors in some parts of the code, but it is nearly impossible to model
-and test a whole operating system and we have to make a cut somewhere. 
+	for practical reasons, they are run only on an extracted part of {\tt
+		mkfs\_xfs.c}, where things like access to disk devices are
+		removed to create a maximally self-contained code. This means
+		that we are not be able to detect errors in some parts of the
+		code, but it is nearly impossible to model and test a whole
+		operating system and we have to make the cut somewhere.
 
 Thus, to be able to compare the various tools directly, some of the tools are run both on the full code as well as on the dissected part.
 
-A potentially interesting comparison could be if there exist some tools using neural networks and deep learning as an integral part of their algorithms. For example as a heuristic to drive the selection of inference rules in theorem proving, or for spotting error patterns~\footnote{Some attempts in modelling a code are hinted in {\em On the Naturalness of Software} by Abram Hindle: \url{http://dl.acm.org/citation.cfm?id=2902362}.}
+A potentially interesting comparison could be if there exist some tools using neural networks and deep learning as an integral part of their algorithms. For example as a heuristic to drive the selection of inference rules in theorem proving, or for spotting error patterns~\footnote{Some attempts in modelling a code are hinted in {\em On the Naturalness of Software} by Abram Hindle: \url{http://dl.acm.org/citation.cfm?id=2902362}.} However, these approaches are even more complex and experimental and would probably deserve a standalone work on their own.
 % TODO http://dl.acm.org/citation.cfm?id=2902362 download and read... search for deep learning sources
 
-List of tools intend to be used (in no particular order): Coverity,
-	CPAChecker, some Lint-like tools, CppCheck and analysis in GCC itself.
+List of tools that were used in this work (in no particular order): Coverity,
+CPAChecker, CppCheck and the analysis in GCC and Clang compilers.
 
 
 %======================================================================
@@ -42,16 +42,39 @@ The tools were run in a Docker container\footnote{Simply stated, a
 		difference between a running virtual machine and its
 		on-disk virtual HDD image. Unlike virtualization,
 		containers are only processes isolated from the rest of the
-system using Kernel capabilities, like {\em cgroups} or {\em chroot}.
-Docker is a specific implementation~\cite{docker}} based on Fedora Linux
+system using kernel capabilities, like {\em cgroups} and {\em chroot}.
+Docker is a specific implementation~\cite{docker} of containers.} based on Fedora Linux
 25. The use of containers ensures a clean and identical environment for
 every tool and every run. Images with CPAChecker and CppCheck are published
 in Docker Hub and all the recipes to build and use them are provided with
 this work. Image with Coverity could not be published, because it contains
-confident information\footnote{We had an access to Red Hat Coverity license
+confident information\footnote{Jan Ťulák had an access to Red Hat Coverity license
 server as a Red Hat employee. However, the server information and some tools
-	Red Hat provided with Coverity are considered confidential. }.
+	Red Hat provided with Coverity are considered confidential.}.
 
+
+Every image has its own starting script for easier manipulation -- {\tt
+run.sh}.  This script creates a container from the image and mounts the
+directory with xfsprogs (or any other directory which is passed to it).
+Then, if necessary, it can pass few options to the script started in
+the container.
+
+{\tt run-test.sh} is the script started by Docker after creating the container.
+This script copies xfsprogs from the mounted directory to another one, so it
+does not change the original repository in any way. In this copied directory
+the script then starts whatever tool it is prepared for.
+
+Users can, if they wish to do so, enter an interactive shell in the container
+instead of starting the tool. Also, it is possible to skip the copying or to
+run {\tt make clean}. For an automated run descripte in
+\Cref{chap:techniques:processing} neither of this is necessary, but these
+options are useful for manual experiments.
+
+
+Coverity, GCC and Clang are run using {\tt csbuild}, a tool to plug static
+analyzers into the build process~\cite{csbuildMan}. Because csbuild attempts to
+use all supported analyzers it finds, the images for each tool we are testing
+are modifed to contain only the single specific tool we need, but no other.
 %_____________________________________________________
 \subsection{CPAChecker}
 %.....................................................
@@ -78,9 +101,8 @@ CppCheck on whole {\tt xfsprogs/mkfs/} directory was:
 
 {\tt cppcheck --enable=all mkfs/}
 
-\TODO{Find some non-default rules for cppcheck and test with them? Or if
-	some other tool finds anything, try to write a rule for that
-		issue.}
+\TODO{Find some non-default rules for cppcheck and test with them? Or try to
+	write a rule for issues found by other tools.}
 
 
 %_____________________________________________________
@@ -94,7 +116,58 @@ those two instances.
 %_____________________________________________________
 \subsection{GCC}
 %.....................................................
-The {\em GNU project C and C++ compiler} is used for compiling xfsprogs and
-it has some static analysis capabilities. The only difference in its use
-from standard configuration is to use the most strict reporting.
+The {\em GNU project C and C++ compiler} is used for compiling xfsprogs and it
+has some static analysis capabilities, because it has to understand the code to
+compile it. The only difference in its use from standard configuration is to
+use the most strict reporting.
+
+%_____________________________________________________
+\subsection{Clang}
+%.....................................................
+Clang is another C/C++ compiler. It is not used by xfsprogs, but can compile
+the code as well, so we can compare it with GCC and other analysis tools. To use
+clang instead of GCC, we decided that the easiest way is to rename clang binary
+to gcc and let xfsprogs behave as if it was gcc, rather than modify autotools
+configuration.
+
+%======================================================================
+\section{Results Processing}\label{chap:techniques:processing}
+%----------------------------------------------------------------------
+The outputs of these tools has different syntax and verbosity, but we had to
+find a way, how to compare them, both between the tools and across revisions,
+     despite some of the tools finding a great amount of issues. A set of
+     scripts to help both with automating the tests and with analysing was
+     created.
+
+First, there is tool {\tt parse.py}, which can automatically run all the tools
+across specified revisions. It takes care of changing the revisions, starting
+every docker container again and finally, it organises the outputs in a logical
+way: in a specified directory, it creates a subdirectory for every revision
+(using the revision's short hash as the directory name) and each such directory
+then contains log files with outputs from each tool.
+
+The output files are not modified in the first step, but to simplify their
+parsing, it is useful to preprocess some of those files (namely from GCC and
+							 Clang) with script
+{\tt format-outputs.sh}, to remove color formatting escape sequences and
+unnecessary compiler outputs.  Such data may be useful for some further
+analysis, but for the next step, it would only make the parsing more complex.
+
+In the last step, script {\tt parse.py}, when supplied with the output
+directory, translates the different syntaxes into a single inner
+representation, which can be then used to simply compute deltas between
+different revisions.
+
+The algorithms to complete these deltas has one known issue: if there are
+multiple issues with the same message (e.g. because variable with name {\tt
+				       foo} was declared, but not used, in
+				       multiple functions) and later some of
+these issues are fixed, the number of issues is correct, but the indicated
+lines may be incorrect. This is because the script has to cope with changing
+code; an issue on line X in one revision can be on line Y in another one, and
+that would require employing much more complex algorithms that would use
+information from git and understand which lines moved where. Thus, in such
+case, the behaviour selecting specific instancies of the same kind of issue is
+undefined.
+
 
