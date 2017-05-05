@@ -5,8 +5,10 @@
 \chapter{Results}\label{chap:results}
 %----------------------------------------------------------------------
 
-If not stated otherwise, the number of issues is for mkfs-specific files.
-That is, for files in {\tt mkfs/} directory.
+In this chapter, the results of every tool are compared and analysed. In
+\Cref{tab:results:overview} is a summary of how many issues every tool
+found. If not stated otherwise, the number of issues is for mkfs-specific
+files, i.e., for files in {\tt mkfs/} directory.
 
 \begin{table}[h]
 \begin{tabular}{|r||r|r|r|r|r|r|}
@@ -21,7 +23,7 @@ Commit & CppCheck & Codacy & CPAChecker & Coverity & GCC & Clang \\
 (tag: v4.7.0) {\tt d7e1f5f1} & $1$ & $4$ & & & $30$ & $28$ \\
 \hline
 \hline
-\multicolumn{6}{|c|}{Changes}\\
+\multicolumn{7}{|c|}{Changes}\\
 \hline
 {\em [Last of my set]} {\tt 2aca16d6} & 0 & 0 & & & 0 & 0 \\
 \hline
@@ -59,7 +61,7 @@ Commit & CppCheck & Codacy & CPAChecker & Coverity & GCC & Clang \\
 \hline
 {\tt ff21c709} & 0 & 0 & & & $+1$ & $+1$ \\
 \hline
-{\em [First of my set]} {\tt 4a32b9e9} & $-1$ & 0 & & & 0 & 0 \\
+{\em [First of my set]} {\tt 4a32b9e9} & $-1$ & $-1$ & & & 0 & 0 \\
 \hline
 \hline
 \multicolumn{7}{|c|}{Total issues} \\
@@ -87,7 +89,101 @@ Commit & CppCheck & Codacy & CPAChecker & Coverity & GCC & Clang \\
 %======================================================================
 \section{CppCheck}\label{chap:results:cppcheck}
 %----------------------------------------------------------------------
+CppCheck (and Codacy, which is using it) found less issues than other
+tools. When the kind of issues found is analysed, it becomes apparent that
+this tool is greatly limited.
 
+When compared with Codacy, CppCheck reports one issue twice: Checking if an
+unsigned variable is less than zero. This happens on two places, but Codacy
+ignores the second occurrence. On the other side, CppCheck did not find any
+issue in {\tt mkfs/proto.c} file, where Codacy did.
+
+These differences might be caused by a different configuration of CppCheck,
+because we used the default configuration, but do not know what changes
+Codacy did.
+
+Despite of this, the results are very similar when compared to other tools,
+so we use only CppCheck in further comparison with other tools. CppCheck is
+selected because we have greater control over it, unlike cloud service Codacy.
+
+\TODO{Should I run it on whole xfsprogs? How? Will it manage a list of
+files to parse without any organisation? Try to bundle it with csbuild?}
+
+% ------------------------------------------------
+\subsection{Version 4.11-rc1 and 4.7.0}
+An overview of issues at these revisions.
+\begin{table}[h]
+\begin{tabular}{|l||r||r|}
+\hline
+& {\tt mkfs/xfs\_mkfs.c} & Whole xfsprogs \\
+\hline
+Issues & 1 &  \\
+\hline
+\end{tabular}
+\caption{In mkfs-specific files, 1 issue was found.}
+%\label{tab:results:overview}
+\end{table}
+
+The issues found in mkfs is:
+\begin{enumerate}
+	\item {\tt mkfs/xfs\_mkfs.c}: The scope of the variable 'bucket' can be reduced.
+\end{enumerate}
+
+% ------------------------------------------------
+\subsection{Version 627e74fd}
+These 3 issues were fixed mkfs:
+\begin{enumerate}
+	\item {\tt mkfs/xfs\_mkfs.c}: Checking if unsigned variable 'blocksize' is less than zero.
+	\item {\tt mkfs/xfs\_mkfs.c}: Checking if unsigned variable
+		'sectorsize' is less than zero. {\em This issue appears
+		twice.}
+\end{enumerate}
+
+
+% ------------------------------------------------
+\subsection{Version 4a32b9e9}
+This 1 issue was fixed in mkfs:
+\begin{enumerate}
+	\item {\tt mkfs/xfs\_mkfs.c}: Condition '0' is always false
+\end{enumerate}
+
+
+% ------------------------------------------------
+\subsection{Version 4.6.0}
+An overview of issues at this revision.
+\begin{table}[h]
+\begin{tabular}{|l||r||r|}
+\hline
+& {\tt mkfs/xfs\_mkfs.c} & Whole xfsprogs \\
+\hline
+Issues & 5 &  \\
+\hline
+\end{tabular}
+\caption{In mkfs-specific files, 1 issue was found.}
+%\label{tab:results:overview}
+\end{table}
+
+The issues found in mkfs is:
+\begin{enumerate}
+	\item {\tt mkfs/xfs\_mkfs.c}: Checking if unsigned variable 'blocksize' is less than zero.
+	\item {\tt mkfs/xfs\_mkfs.c}: Checking if unsigned variable
+		'sectorsize' is less than zero. {\em This issue appears
+		twice.}
+	\item {\tt mkfs/xfs\_mkfs.c}: Condition '0' is always false
+	\item {\tt mkfs/xfs\_mkfs.c}: The scope of the variable 'bucket' can be reduced.
+\end{enumerate}
+
+All these issues were present for multiple years. Precise dating is
+difficult, however, because e.g. issue 1 is blamed to a commit 16 years
+old. But at that time, the variable was signed. Thus, the issue appeared
+some time later, when the specific variable was turned to unsigned, but not
+every use was fully converted.
+
+Neither of these issues is of any seriousness. Every found check of an
+unsigned variable to being lower than zero is in fact a less-or-equal
+check. Thus, {\tt unsigned\_variable <= 0} may be misleading, but
+functionally is equivalent to {\tt unsigned\_variable == 0}.
+The condition '0' is a value intentionally passed to a macro.
 
 
 %======================================================================
@@ -101,8 +197,14 @@ branch, which is uncomfortable, but manageable for a private\footnote{In
 the sense of being the only user, not in terms of visibility.} repository.
 In a repository with many contributors it can be confusing.
 
+Codacy provides some rating on the project's page~\cite{codacyXfsprogs},
+which considers xfsprogs as a quality project (A-grade), but the weight of
+this rating is unclear and rather informal.
+
+For comparison with other tools, see introduction of \Cref{chap:results:cppcheck}.
+
 % ------------------------------------------------
-\subsection{Version {\tt 4.11-rc1}}
+\subsection{Version 4.11-rc1}
 An overview of issues at this revision.
 \begin{table}[h]
 \begin{tabular}{|l||r|r||r|}
@@ -126,7 +228,7 @@ The issues found in mkfs are:
 \end{enumerate}
 
 % ------------------------------------------------
-\subsection{Version 4.7}
+\subsection{Version 4.7.0}
 An overview of issues at this revision.
 \begin{table}[h]
 \begin{tabular}{|l||r|r|r||r|}
@@ -151,7 +253,17 @@ The issues found in mkfs are:
 \end{enumerate}
 
 % ------------------------------------------------
-\subsection{Version 4.6}
+\subsection{Revision 627e74fd}
+Fixed 2 issues in {\tt mkfs/xfs\_mkfs.c}:
+
+\begin{enumerate}
+\item Checking if unsigned variable 'blocksize' is less than zero. (line 1579)
+\item Checking if unsigned variable 'sectorsize' is less than zero. (line
+								     1705)
+\end{enumerate}
+
+% ------------------------------------------------
+\subsection{Version 4.6.0}
 
 An overview of issues at this revision.
 \begin{table}[h]
@@ -178,29 +290,7 @@ The issues found in mkfs are:
 	\item {\tt mkfs/proto.c}: The function 'parse\_proto' is never used.
 \end{enumerate}
 
-All these issues were present for multiple years. Precise dating is
-difficult, however, because e.g. issue 1. is blamed for a commit 16 years
-old. But at that time, the variable was signed. Thus, the issue appeared
-some time later, when the specific variable was turned to unsigned, but not
-every use was fully converted.
 
-
-
-% ------------------------------------------------
-\subsection{Revision 627e74fd}
-Fixed 2 issues in {\tt mkfs/xfs\_mkfs.c}:
-
-\begin{enumerate}
-\item Checking if unsigned variable 'blocksize' is less than zero. (line 1579)
-\item Checking if unsigned variable 'sectorsize' is less than zero. (line
-								     1705)
-\end{enumerate}
-
-\subsection{Summary}
-Codacy provides some rating on the project's page~\cite{codacyXfsprogs},
-which considers xfsprogs as a quality project (A-grade).
-
-\TODO{compare with other tools}
 
 %======================================================================
 \section{CPAChecker}\label{chap:results:cpachecker}
@@ -214,7 +304,12 @@ which considers xfsprogs as a quality project (A-grade).
 \section{GCC}\label{chap:results:gcc}
 %----------------------------------------------------------------------
 
+
 %======================================================================
 \section{Clang}\label{chap:results:clang}
+%----------------------------------------------------------------------
+
+%======================================================================
+\section{Summary}\label{chap:results:summary}
 %----------------------------------------------------------------------
 
