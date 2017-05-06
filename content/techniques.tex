@@ -171,3 +171,40 @@ case, the behaviour selecting specific instancies of the same kind of issue is
 undefined.
 
 
+The classification of issues into one of the style, error or security category
+is only indicative. For GCC and Clang it is based on what specific flag for the
+compiler enables reporting of any specific issue. We attempted to estimate what
+consequences can these issues have in general, whether they can cause a bigger
+problem, or if their greatest danger is in being misleading or not a good
+practice.
+
+From the issues found in whole xfsprogs, we configured only one compiler flag
+to be detected as something else than style issue: {\tt -Wfloat-equal}.
+Directly comparing two floats is not reliable due to their representation
+in memory~\cite{floatsComparing}. Thus, this kind of issue is certainly
+something that can work differently than expected and deserves more
+attention, than, say, shadowing a global variable with local one.
+
+This kind of issue was not found in mkfs itself and in xfsprogs, it appears
+only on two places, both to set the precision of a printf. In other words,
+the only occurrences of direct comparison of floats are intentional testing
+for imprecise numbers and can be considered false positives in the context
+of the program. Clang finds this issue as well. In comparison, Coverity
+does not raise it and it seems that it can somehow infer the intention of
+the use.
+
+For CppCheck, the classification uses the category reported by CppCheck itself:
+If CppCheck reports an issue as anything else than style issue, it is
+considered a potential error, but it did not report anything else than style
+issue. Coverity reports also a categorization. In xfsprogs, the only two
+categories that were reported are quality and security.
+
+Finally, while it is possible to find differences between revisions within the
+results of a single tool, albeit with the small instability in case of multiple
+similar entries mentioned above, doing this between tools on a single revision
+proved a much more complex task. Every tool describes the same issue with
+different words, so to be able to automatically compute any differences, such
+an algorithm would have to understand the issue in all details. Thus,
+   cross-tool differences are not computed automatically, but manually for the
+   cases where it is reasonable given to the amount of issues that has to be
+   analysed.
