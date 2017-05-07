@@ -110,8 +110,6 @@ Despite of this, the results are very similar when compared to other tools,
 so we use only CppCheck in further comparison with other tools. CppCheck is
 selected because we have greater control over it, unlike cloud service Codacy.
 
-\TODO{Should I run it on whole xfsprogs? How? Will it manage a list of
-files to parse without any organisation? Try to bundle it with csbuild?}
 
 % ------------------------------------------------
 \subsection{Version 4.6.0}
@@ -121,10 +119,11 @@ An overview of issues at this revision.
 \hline
 & {\tt mkfs/xfs\_mkfs.c} & Whole xfsprogs \\
 \hline
-Issues & 5 &  \\
+Issues & 5 & 460 \\
 \hline
 \end{tabular}
-\caption{In mkfs-specific files, 1 issue was found.}
+\caption{In mkfs-specific files, 1 issue was found, and 460 issues in whole
+xfsprogs. From these, 100 issues were not stylistic.}
 %\label{tab:results:overview}
 \end{table}
 
@@ -190,10 +189,11 @@ An overview of issues at these revisions.
 \hline
 & {\tt mkfs/xfs\_mkfs.c} & Whole xfsprogs \\
 \hline
-Issues & 1 &  \\
+Issues & 1 & 440 \\
 \hline
 \end{tabular}
-\caption{In mkfs-specific files, 1 issue was found.}
+\caption{In mkfs-specific files, 1 issue was found. In whole xfsprogs, 440
+issues were found, from which 100 issues were not style issues.}
 %\label{tab:results:overview}
 \end{table}
 
