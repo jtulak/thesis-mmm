@@ -108,10 +108,30 @@ CppCheck on whole {\tt xfsprogs/mkfs/} directory was:
 %_____________________________________________________
 \subsection{Coverity}
 %.....................................................
-Coverity was used both manually in a Docker container, and automatically,
-using the public Coverity service for open source projects, which is part
+Coverity was used both manually in a Docker container, and automatically
+using the public Coverity service for open source projects which is part
 of standard xfsprogs development process, to compare the results between
 those two instances.
+
+Furthermore, in local analysis, four levels of analysis aggressivness were
+tested: low (default settings), medium, high and custom (all). The different
+results are compared in \Cref{chap:results:coverity}, where were look at a
+summary of what these levels enabled. With a higher level, Coverity makes more
+aggressive assumptions during the analysis, which means more defects being
+reported and longer analysis time~\cite{coverityMan}.
+
+Coverity manual claims false positive rate for all checkers that are not parse
+warnings increases approximately by 50\% for medium and by 70\% for high. It
+does not have an effect on parse warnings checkers.
+
+All levels have enabled everything that a previous, lower level has, plus some
+additional checks. The medium level uses low level plus enables some other
+checks, including parse warnings, infinite loops, some resource leaks checks,
+etc. The high level then adds e.g. integer overflow detections and more checks
+for infinite loops. A speciall, level, enabled by a different flag for {\tt
+cov-analysis}, then enables almost all checkers, with only few minor
+exceptions. For full (rather long) list of what checkers are enabled on every
+level, consult the {\tt cov-analysis} manual~\cite{coverityMan}.
 
 %_____________________________________________________
 \subsection{GCC}

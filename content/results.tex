@@ -10,10 +10,6 @@ In this chapter, the results of every tool are compared and analysed. In
 found. If not stated otherwise, the number of issues is for mkfs-specific
 files, i.e., for files in {\tt mkfs/} directory.
 
-Further in the text, we have both a simple statistical analysis of what each
-tool found, and a more detailed look on some specific issues and revisions,
-especially where the tools have seriously different results.
-
 \begin{table}[h]
 \begin{tabular}{|r||r|r|r|r|r|r|}
 \hline
@@ -22,73 +18,84 @@ Commit & CppCheck & Codacy & CPAChecker & Coverity & GCC & Clang \\
 \hline
 \multicolumn{7}{|c|}{Total issues}\\
 \hline
-(tag: v4.11.0-rc1) {\tt 07a3e793} & $1$ & $3$ & & & $30$ & $34$ \\
+(tag: v4.11.0-rc1) {\tt 07a3e793} & $1$ & $3$ & & $119$ & $30$ & $34$ \\
 \hline
-(tag: v4.7.0) {\tt d7e1f5f1} & $1$ & $4$ & & & $30$ & $28$ \\
+(tag: v4.7.0) {\tt d7e1f5f1} & $1$ & $4$ & & $119$ & $30$ & $28$ \\
 \hline
 \hline
 \multicolumn{7}{|c|}{Changes}\\
 \hline
-{\em [Last of my set]} {\tt 2aca16d6} & 0 & 0 & & & 0 & 0 \\
+{\em [Last of my set]} {\tt 2aca16d6} & 0 & 0 & & 0 & 0 & 0 \\
 \hline
-{\tt aa3034d4} & 0 & 0 & & & 0 & 0 \\
+{\tt aa3034d4} & 0 & 0 & & $+2$/$-2$ & 0 & 0 \\
 \hline
-{\tt 6de2e6c0} & 0 & 0 & & & 0 & 0 \\
+{\tt 6de2e6c0} & 0 & 0 & & $+5$ & 0 & 0 \\
 \hline
-{\tt ddc3b2da} & 0 & 0 & & & 0 & 0\\
+{\tt ddc3b2da} & 0 & 0 & & 0 & 0 & 0\\
 \hline
-{\tt 06ac92fd} & 0 & 0 & & & $+1$ & $+1$\\
+{\tt 06ac92fd} & 0 & 0 & & $+12$/$-3$ & $+1$ & $+1$\\
 \hline
-{\tt 27ae3a59} & 0 & 0 & & & 0 & 0 \\
+{\tt 27ae3a59} & 0 & 0 & & $+1$ & 0 & 0 \\
 \hline
-{\tt 3ec1956a} & 0 & 0 & & & 0 & 0 \\
+{\tt 3ec1956a} & 0 & 0 & & $+1$/$-3$ & 0 & 0 \\
 \hline
-{\tt 6c855628} & 0 & 0 & & & $-2$ & $-2$ \\
+{\tt 6c855628} & 0 & 0 & & $+2$/$-2$ & $-2$ & $-2$ \\
 \hline
-{\tt 627e74fd} & $-3$ & $-2$ & & & $+2$ & $+2$ \\
+{\tt 627e74fd} & $-3$ & $-2$ & & 0 & $+2$ & $+2$ \\
 \hline
-{\tt 9090e187} & 0 & 0 & & & 0 & 0 \\
+{\tt 9090e187} & 0 & 0 & & $+2$ & 0 & 0 \\
 \hline
-{\tt 1974d3f1} & 0 & 0 & & & $-1$ & 0 \\
+{\tt 1974d3f1} & 0 & 0 & & 0 & $-1$ & 0 \\
 \hline
-{\tt 56e4d368} & 0 & 0 & & & 0 & 0 \\
+{\tt 56e4d368} & 0 & 0 & & $-3$ & 0 & 0 \\
 \hline
-{\tt a9dad670} & 0 & 0 & & & $-54$ & $-54$ \\
+{\tt a9dad670} & 0 & 0 & & $+4$ & $-54$ & $-54$ \\
 \hline
-{\tt 147e0f31} & 0 & 0 & & & 0 & 0 \\
+{\tt 147e0f31} & 0 & 0 & & $+3$ & 0 & 0 \\
 \hline
-{\tt c81c8460} & 0 & 0 & & & $-50$ & $-50$ \\
+{\tt c81c8460} & 0 & 0 & & 0 & $-50$ & $-50$ \\
 \hline
-{\tt a887c950} & 0 & 0 & & & $+13$ & $+12$ \\
+{\tt a887c950} & 0 & 0 & & $+1$/$-3$ & $+13$ & $+12$ \\
 \hline
-{\tt 5f1a2100} & 0 & 0 & & & 0 & 0 \\
+{\tt 5f1a2100} & 0 & 0 & & 0 & 0 & 0 \\
 \hline
-{\tt ff21c709} & 0 & 0 & & & $+1$ & $+1$ \\
+{\tt ff21c709} & 0 & 0 & & 0 & $+1$ & $+1$ \\
 \hline
-{\em [First of my set]} {\tt 4a32b9e9} & $-1$ & $-1$ & & & 0 & 0 \\
+{\em [First of my set]} {\tt 4a32b9e9} & $-1$ & $-1$ & & 0 & 0 & 0 \\
 \hline
 \hline
 \multicolumn{7}{|c|}{Total issues} \\
 \hline
-{\em [Before my set]} {\tt 6aa32b47} & $5$ & $6$ & & & $121$ & $117$ \\
+{\em [Before my set]} {\tt 6aa32b47} & $5$ & $6$ & & $111$ & $121$ & $117$ \\
 \hline
-(4.6.0) {\tt 09033e35} & $5$ & $6$ & & & $121$ & $117$ \\
+(4.6.0) {\tt 09033e35} & $5$ & $6$ & & $111$ & $121$ & $117$ \\
 \hline
 \end{tabular}
-\caption{An overview of issues found by the tested tools on specific
-	revisions in mkfs-only files.\newline
+\caption{An overview of issues found by the tested tools on specific revisions
+	in mkfs-only files. Coverity numbers are for aggressivness level {\em
+	custom} (all checkers enabled).\newline
 	\newline
 	Legend: Revisions annotated with {\em total issues} shows the
 	number of outstanding issues. All other revisions shows new/fixed
 	issues.  $+x$ denotes amount of new issues found, $-x$ denotes number
-	of issues fixed between this and the previously tested revision. The
-	numbers are absolute, that is, 0 means no change, $+1$ means one new
-	issue and $+1$/$-2$ means one new and two removed. A --- dash means that
-	the tool was not used on this specific revision.}
+	of issues fixed between this and the previously tested revision. A ---
+	dash means that the tool was not used on this specific revision.}
 
 
 \label{tab:results:overview}
 \end{table}
+
+It is apparent from the table, even on the first glance, that the tools
+performance varies widely. Not only in absolute numbers of reported issues (of
+some are false positives), but also in analysing specific revisions. For
+example, revision {\tt a9dad670} fixed 54 issues according to GCC, but
+according to Coverity, it caused 4 new and did not fix anything.
+
+Further in the text, we have both a simple statistical analysis of what each
+tool found, and a more detailed look on some specific issues and revisions,
+especially where the tools have seriously different results.
+
+
 
 %======================================================================
 \section{CppCheck}\label{chap:results:cppcheck}
@@ -335,16 +342,6 @@ The issues found in mkfs are:
 		used.
 \end{enumerate}
 
-
-
-%======================================================================
-\section{CPAChecker}\label{chap:results:cpachecker}
-%----------------------------------------------------------------------
-
-%======================================================================
-\section{Coverity}\label{chap:results:coverity}
-%----------------------------------------------------------------------
-
 %======================================================================
 \section{GCC}\label{chap:results:gcc}
 %----------------------------------------------------------------------
@@ -570,6 +567,54 @@ substitues specific types, as can be seen in the list of reported issues:
 		parameter of type 'char *' discards qualifiers
 \end{enumerate}
 
+
+%======================================================================
+\section{Coverity}\label{chap:results:coverity}
+%----------------------------------------------------------------------
+
+Coverity, when run manually in the docker container, found the highest number
+of issues from all the tools. The online version found 9 issues in
+mkfs-specific files on a recent (4.11) version~\cite{CoverityXfsprogs},
+compared to 97 found on a manual run with a high level of aggressivness. What
+effect the aggressivness level has can be seen on
+\Cref{tab:results:coverity:levels}.  It is apparent that the online service
+uses a special configuration, but we were not able to identify specifics.
+
+\begin{table}[h]
+\begin{tabular}{|l||r||r|r|r|r|}
+\hline
+& Coverity online & low & medium & high & custom \\
+\hline
+Issues reported & 9 & 0 & 36 & 97 & 119 \\
+\hline
+\end{tabular}
+\caption{Comparison of issues found by Coverity online service and Coverity run
+locally with different levels of aggressivness. Numbers are for mkfs-specific
+files. Locally tested revision is {\tt 07a3e793} (v4.11.0-rc1), the online
+service tested revision {\tt ge116c5c} (v4.11.0-rc2).}
+\label{tab:results:coverity:levels}
+\end{table}
+
+In most of this section, we focus on results gained from the custom (highest)
+level. The online service is briefly described and some interesting statistics
+comparing xfsprogs with other open-source projects are provided only in
+\Cref{chap:results:coverity:online}.
+
+The reasons for selecting custom level aggressivness as the level on which our
+analysis focusses is that for other tools we used the strictest settings
+available, thus, analysing relaxed approach on any other level is not
+comparable with other tools.
+
+% ------------------------------------------------
+\subsection{Online Service}\label{chap:results:coverity:online}
+
+The online service available at
+\url{https://scan.coverity.com/projects/xfsprogs} provides various statistics
+in addition to reported issues.
+
+%======================================================================
+\section{CPAChecker}\label{chap:results:cpachecker}
+%----------------------------------------------------------------------
 
 %======================================================================
 \section{Summary}\label{chap:results:summary}
