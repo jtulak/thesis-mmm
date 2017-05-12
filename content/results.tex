@@ -7,23 +7,24 @@
 
 In this chapter, the results of every tool are compared and analysed. If not
 stated otherwise, the number of issues is for mkfs-specific files, i.e., for
-files in {\tt mkfs/} directory. Every tool has its own section in which its performance is analysed across of multiple revisions of mkfs in detail.
+files in {\tt mkfs/} directory. Every tool has its own section in which its
+performance is analysed across of multiple revisions of mkfs in detail.
 
-The \Cref{tab:results:overview} offers an overview of how many issues did every
+\Cref{tab:results:overview} offers an overview of how many issues did every
 tool find on various revisions. These revisions are stored in the project's git
 repository and they are identified by their hash, so this table also shows
 which revision follows which.  Selected revisions (annotated with {\em total
 issues}) shows the number of outstanding issues on this specific point of
 development.
 
-For the remaning revisons, thetable shows new/fixed issues: $+x$ denotes amount
-of new issues found, $-x$ denotes number of issues fixed between this and the
-previously tested revision. For example, revision {\tt a887c950} has a value
-$+1$/$-3$ for Coverity. That means that, according to Coverity, one new issue
-appeared in this revision, while 3 others were fixed. A zero in this case means
-no change.  A --- dash means that the tool was not used on this specific
-revision.  The numbers of issues were gained with every tool set up to the
-strictest analysis.
+For the remaining revisions, the table shows new/fixed issues: $+x$ denotes the
+number of new issues found, $-x$ denotes the number of issues fixed between this
+and the previously tested revision. For example, revision {\tt a887c950} has a
+value $+1$/$-3$ for Coverity. That means that, according to Coverity, one new
+issue appeared in this revision, while 3 others were fixed. A zero, in this
+case, means no change.  A --- dash means that the tool was not used in this
+specific revision.  The numbers of issues were gained with every tool set up to
+the strictest analysis.
 
 \begin{table}[h]
 \begin{tabular}{|r||r|r|r|r|r|r|}
@@ -91,14 +92,14 @@ Commit & CppCheck & Codacy & CPAChecker & Coverity & GCC & Clang \\
 \label{tab:results:overview}
 \end{table}
 
-It is apparent from the table, even on the first glance, that the tools
-performance varies widely. Not only in absolute numbers of reported issues (of
+It is apparent from the table, even on the first glance, that the performance
+of the tools varies widely. Not only in absolute numbers of reported issues (of
 which some are false positives), but also in detecting specific issues. For
 example, revision {\tt a9dad670} fixed 54 issues according to GCC, but
 according to Coverity, it caused 4 new and did not fix anything.
 
-Further in the text, we have both a simple statistical analysis of what each
-tool found, and a more detailed look on some specific issues and revisions,
+Bellow, we have both a simple statistical analysis of what each
+tool found and a more detailed look at some specific issues and revisions,
 especially where the tools have seriously different results.
 
 
@@ -106,14 +107,14 @@ especially where the tools have seriously different results.
 %======================================================================
 \section{CppCheck}\label{chap:results:cppcheck}
 %----------------------------------------------------------------------
-CppCheck (and Codacy, which is using it) found less issues than other
+CppCheck (and Codacy, which is using it) found fewer issues than other
 tools. When the kind of issues found is analysed, it becomes apparent that
 this tool is greatly limited. Still, this tool is the easiest to use and it is
-open source, which can make it a usefull entry point for projects that do not
+open source, which can make it a useful entry point for projects that do not
 use any other form of analysis.
 
 The only two revisions we mention here are v4.6.0 and 4.7.0, before and after
-our patches. The differences between other revisions are neglible.
+our patches. The differences between other revisions are negligible.
 
 In version 4.6.0, 5 issues were found in mkfs-specific
 files, and 460 issues in whole xfsprogs. From these, 100 issues were not
@@ -121,13 +122,15 @@ stylistic.
 
 The issues found in mkfs are:
 \begin{enumerate}
-	\item {\tt mkfs/xfs\_mkfs.c:1067}: Checking if unsigned variable 'blocksize' is less than zero.
+	\item {\tt mkfs/xfs\_mkfs.c:1067}: Checking if unsigned variable
+		'blocksize' is less than zero.
 	\item {\tt mkfs/xfs\_mkfs.c:1698}: Checking if unsigned variable
 		'sectorsize' is less than zero.
 	\item {\tt mkfs/xfs\_mkfs.c:1225}: Checking if unsigned variable
 		'sectorsize' is less than zero.
 	\item {\tt mkfs/xfs\_mkfs.c:2487}: Condition '0' is always false
-	\item {\tt mkfs/xfs\_mkfs.c:2733}: The scope of the variable 'bucket' can be reduced.
+	\item {\tt mkfs/xfs\_mkfs.c:2733}: The scope of the variable 'bucket'
+		can be reduced.
 \end{enumerate}
 
 All these issues were present for multiple years. Precise dating is
@@ -137,15 +140,15 @@ some time later, when the specific variable was turned to unsigned, but not
 every use was fully converted.
 
 Neither of these issues is of any seriousness. Every found check of an
-unsigned variable to being lower than zero is in fact a less-or-equal
+unsigned variable to being lower than zero is, in fact, a less-or-equal
 check. \Cref{lst:results:sectorsize} shows the specific code for both cases
 of offending sectorsize. Thus, {\tt unsigned\_variable <= 0} may be
 misleading, but functionally is equivalent to {\tt unsigned\_variable ==
 0}.  And the condition '0' being always false is a value intentionally
 passed to a macro.
 
-Other tools does not report this case of unsigned variable comparison,
-likely because the lower-than symbol in this case does not have any effect.
+Other tools do not report this case of unsigned variable comparison,
+likely because the lower-than symbol, in this case, does not have any effect.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=C, numbers=none, numberstyle=\tiny\color{black},caption=
@@ -163,7 +166,7 @@ The issue found in mkfs  is:\\
 {\tt mkfs/xfs\_mkfs.c:2918}: The scope of the variable 'bucket' can be reduced.
 
 When compared with Codacy, CppCheck reports one issue twice: Checking if an
-unsigned variable is less than zero. This happens on two places, but Codacy
+unsigned variable is less than zero. This happens in two places, but Codacy
 ignores the second occurrence. On the other side, CppCheck did not find any
 issue in {\tt mkfs/proto.c} file, where Codacy did.
 
@@ -171,14 +174,14 @@ These differences might be caused by a different configuration of CppCheck,
 because we used the default configuration, but do not know what changes
 Codacy did.
 
-Despite of this, the results of those two tools are very similar when compared
+Despite this, the results of those two tools are very similar when compared
 to others, so we use only CppCheck in further comparison with other tools.
 CppCheck is selected because we have greater control over it, unlike cloud
 service Codacy, and on this sample produced no false positives, although the
 usfullness of some reports is arguable.
 
 The low number of issues found can be attributed to the detailed review of all
-patches submited to the project. If most issues are usually spotted during the
+patches submitted to the project. If most issues are usually spotted during the
 development in the patches and fixed before they are merged into the code, it
 leaves space for only more complex and not so obvious issues, which CppCheck
 analysis is not capable of finding and a stronger tool is necessary.
@@ -189,15 +192,15 @@ analysis is not capable of finding and a stronger tool is necessary.
 Codacy shows only per-commit and total issues for a branch. That is, a
 developer can view whether a specific commit fixed or caused an issue, and
 can see what are the issues for the top of the repository, but checking the
-complete state on a particular point in the history requires creating a new
+complete state at a particular point in the history requires creating a new
 branch, which is uncomfortable, but manageable for a private\footnote{In
 the sense of being the only user, not in terms of visibility.} repository.
-In a repository with many contributors it can be confusing.
+In a repository with many contributors, it can be confusing.
 
 Codacy provides some rating on the project's page~\cite{codacyXfsprogs},
 which considers xfsprogs as a quality project (A-grade), but the weight of
 this rating is unclear and rather informal. Also, it is not clear without
-checking every issue, what metrics Codacy uses to asses the type, whether
+checking every issue, what metrics Codacy uses to assess the type, whether
 it is style, error or security issue.
 
 In mkfs-specific files in version 4.6.0, 6 issues were found. Whole
@@ -215,12 +218,13 @@ However, these functions are used in {\tt mkfs/xfs\_mkfs.c} file, thus they are
 false positives. Also, CppCheck found two places on which {\tt sectorize} is
 checked to be less than zero, but Codacy reports it only once. Curiously, the
 same issue appears on two places not far away, and in both cases, it is in this
-exact condition as can be seen on \Cref{lst:results:sectorsize} in
+exact condition as can be seen in \Cref{lst:results:sectorsize} in
 \Cref{chap:results:cppcheck}, just inside of different blocks, but still in the
-same function and path to both places is possible. Why Codacy does report only one of those issues is unclear.
+same function and path to both places is possible. Why Codacy does report only
+one of those issues is unclear.
 
 
-In version 4.7.0 inn mkfs-specific files, 4 issues were found. Whole
+In version 4.7.0 in mkfs-specific files, 4 issues were found. Whole
 xfsprogs had 749 issues, from which 719 were code style issue and 30 were
 potential errors.
 
@@ -239,7 +243,7 @@ The four issues found in this version are similar to what can be seen for the 4.
 Also in this case, the supposedly unused function {\tt max\_trans\_res} is
 in fact used in another file.
 
-In total, Codacy results are similar to CppCheck itself, but with more false
+In total, Codacy results are similar to CppCheck itself, but with more of false
 positives. The only advantage it offers is automated integration with GitHub.
 With a correct set-up, it can ensure that every push into the repository is
 tested.
@@ -249,7 +253,7 @@ tested.
 %----------------------------------------------------------------------
 
 Despite being developed independently, GCC and Clang are very similar in what
-they found, with GCC finding a few more issues. In this section we describe
+they found, with GCC finding a few more issues. In this section, we describe
 some of the notable differences between those two tools and compare them to
 others where it is reasonable.
 
@@ -257,7 +261,7 @@ others where it is reasonable.
 \subsection{Version 4.6.0}\label{chap:results:gcc:4.6}
 
 \Cref{tab:results:gcc:4.6} compares GCC and Clang in this revision, and we
-specifically look on the differences between these two tools and Codacy.
+specifically look at the differences between these two tools and Codacy.
 Other issues are not listed here due to their amount, but the reader can find
 them on an attached optical disc, or replicate them using the tools attached to
 this work.
@@ -272,16 +276,17 @@ GCC & 121 & 2 & 2013 \\
 Clang & 113 & 4 & 2597 \\
 \hline
 \end{tabular}
-\caption{Comparison of number of issues reported by GCC and Clang in version
+\caption{Comparison of the number of issues reported by GCC and Clang in version
 4.6.0.}
 \label{tab:results:gcc:4.6}
 \end{table}
 
-As is shown in \Cref{chap:results:codacy:4.6}, Codacy found two issues in
+As is shown in \Cref{chap:results:codacy}, Codacy found two issues in
 this file too. Curiously, Codacy found two unused functions, while GCC
 found these issues:
 \begin{enumerate}
-	\item {\tt mkfs/proto.c:270}: comparison between signed and unsigned integer expressions
+	\item {\tt mkfs/proto.c:270}: comparison between signed and unsigned
+		integer expressions
 	\item {\tt mkfs/proto.c:332}: unused parameter 'mp'
 \end{enumerate}
 
@@ -289,7 +294,7 @@ These issues are not in the two functions found by Codacy. However, the are
 inside of functions called from the ones marked as unused by Codacy. It is
 possible that they were not reported because of this, but given that the
 mentioned Codacy issues are false positives and that Codacy did not found many
-other issues, it is likely that Codacy simply did not noticed them, while GCC
+other issues, it is likely that Codacy simply did not notice them, while GCC
 did.
 
 In addition to the two issues found by GCC in {\tt mkfs/proto.c}, Clang
@@ -300,7 +305,7 @@ found two other issues (both of the same kind):
 \end{enumerate}
 
 These two new issues, complaining about a missing field, are probably false
-positives, because on these lines, a structure with all members zeroed is
+positives because, on these lines, a structure with all members zeroed is
 created, as can be seen in \Cref{lst:results:zeroedStruct}.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
@@ -312,11 +317,14 @@ struct xfs_trans_res    tres = {0};
 \end{lstlisting}
 
 The difference between GCC and Clang in {\tt mkfs\_xfs.c} file is 8 issues in
-absolute numbers, and the real difference is not much bigger; GCC reports more cases of a comparison between signed and unsigned integer than Clang does. Clang on the other hand reports few cases of this issue:
+absolute numbers, and the real difference is not much bigger; GCC reports more
+cases of a comparison between signed and unsigned integer than Clang does.
+Clang, on the other hand, reports few cases of this issue:
 
-{\tt mkfs/xfs\_mkfs.c:2906} cast from 'char *' to 'xfs\_alloc\_rec\_t *' (aka 'struct xfs\_alloc\_re    c *') increases required alignment from 1 to 4
+{\tt mkfs/xfs\_mkfs.c:2906} cast from 'char *' to 'xfs\_alloc\_rec\_t *' (aka
+'struct xfs\_alloc\_re    c *') increases required alignment from 1 to 4
 
-Other than that, they reports the same issues.
+Other than that, they report the same issues.
 
 % ------------------------------------------------
 \subsection{Revision a887c950}\label{chap:results:gcc:a887c950}
@@ -330,15 +338,15 @@ kinds:
 		pointer target type
 \end{enumerate}
 
-Clang detected all the 12 occurences the second issue, but missed the first,
-comparison issue. The offending line for the missed issue is shown on
-\Cref{lst:results:logagnoComparison}. Closer look on this line reveals that
+Clang detected all the 12 occurrences the second issue but missed the first,
+comparison issue. The offending line for the missed issue is shown in
+\Cref{lst:results:logagnoComparison}. A closer look on this line reveals that
 there is an explicit type casting. The new type is a signed integer. However,
 the variable {\tt logagno} is declared with type {\tt xfs\_agnumber\_t} and
 this type is declared as an alias to {\tt \_\_uint32\_t} in file {\tt
 libxfs/xfs\_types.h}.
 
-According to standard of C language, the type casting has a precedence over
+According to the standard of C language, the type casting has a precedence over
 comparison~\cite[A.2.1]{ISO9899}, so Clang, when evaluating this line, sees
 an integer. That is technically correct, but in a wider context, it is also
 clear that the possible values are still limited by the original type, and
@@ -355,15 +363,15 @@ if ((__int64_t)logagno < 0)
 	// do something
 \end{lstlisting}
 
-The other issues are similar to what Clang found, but appears to suffer the
-unstability in parsing mentioned in \Cref{chap:techniques:processing}.
+The other issues are similar to what Clang found but appears to suffer the
+instability in parsing mentioned in \Cref{chap:techniques:processing}.
 All these issues are caused by passing a constant string to a
 function which does not has the {\tt const} keyword for an argument: {\tt
 illegal(value, "b log");}. The file {\tt xfs\_mkfs.c} contains 44 such
 calls, but only some of them were added in this revision. Thus, we correctly
 detected these issues, but some of the line numbers we see had this issue
 before. If we would want to see exactly which lines were added, the easiest way
-is to look to look on changes in this specific commit.
+is to look to look at changes in this specific commit.
 
 
 % ------------------------------------------------
@@ -371,7 +379,7 @@ is to look to look on changes in this specific commit.
 
 Clang found 3 more issues in this revision than GCC did in file {\tt
 mkfs/proto.c}, as is shown in the comparison in \Cref{tab:results:gcc:4.7}. Two
-of them already appeared in description of revision 4.6 in
+of them already appeared in the description of revision 4.6 in
 \Cref{chap:results:gcc:4.6} and were not fixed, the third issue is of the same
 kind and was introduced by some other patch other than which are part of this
 work.
@@ -386,12 +394,12 @@ GCC & 28 & 2 & 2013 \\
 Clang & 23 & 5 & 2511 \\
 \hline
 \end{tabular}
-\caption{Comparison of number of issues reported by GCC and Clang in version
+\caption{Comparison of the number of issues reported by GCC and Clang in version
 4.7.0.}
 \label{tab:results:gcc:4.7}
 \end{table}
 
-Almost all issues found in {\tt mkfs/xfs\_mkfs.c} are about comparison, with
+Almost all issues found in {\tt mkfs/xfs\_mkfs.c} are about a comparison, with
 only two exceptions:
 \begin{enumerate}
 	\item {\tt mkfs/xfs\_mkfs.c:728}: unused parameter 'lsectsz'
@@ -400,10 +408,10 @@ only two exceptions:
 \end{enumerate}
 
 
-Most issues in Clang are also about comparison, with multiple versions of
+Most issues in Clang are also about a comparison, with multiple versions of
 wording, because where GCC uses only one universal message, Clang uses a
-template into which it substitues specific types. This makes the analysis of
-the results more challenging, but does not have any effect on the results.
+template into which it substitutes specific types. This makes the analysis of
+the results more challenging but does not have any effect on the results.
 In this revision, Clang does not report any new kind of issues against version
 4.6.0.
 
@@ -411,14 +419,14 @@ In this revision, Clang does not report any new kind of issues against version
 \section{Coverity}\label{chap:results:coverity}
 %----------------------------------------------------------------------
 
-Coverity, when run manually in the docker container, found comparable number of
-issues as GCC and Clang in mkfs-specific files. On the other hand, the online
-version did not found any issues in mkfs on a recent (4.11)
+Coverity, when it is run manually in the docker container, found a comparable
+number of issues as GCC and Clang in mkfs-specific files. On the other hand,
+the online version did not found any issues in mkfs on a recent (4.11)
 version~\cite{CoverityXfsprogs}, compared to 111 found on a manual run with the
 highest level of aggressiveness. What effect the aggressiveness level has can
-be seen on \Cref{tab:results:coverity:levels}. The numbers in this table are
+be seen in \Cref{tab:results:coverity:levels}. The numbers in this table are
 for mkfs-specific files. The tested revision is {\tt 07a3e793} (v4.11.0-rc1).
-From the results it is probable that the service is using configuration similar
+From the results, it is probable that the service is using configuration similar
 to the low aggressiveness.  Especially when numbers for the whole xfsprogs are
 compared.
 
@@ -444,7 +452,7 @@ are provided only in \Cref{chap:results:coverity:online}.
 The reasons for selecting the custom level aggressiveness as the level on which
 our analysis focusses is that for other tools we used the strictest settings
 available, thus, analysing relaxed approach on any other level is not
-comparable with other tools.
+comparable to other tools.
 
 % ------------------------------------------------
 \subsection{Online Service}\label{chap:results:coverity:online}
@@ -453,8 +461,8 @@ The online service available at
 \url{https://scan.coverity.com/projects/xfsprogs} provides various statistics
 in addition to reported issues. The online service found no issues in mkfs. In
 whole xfsprogs, it reported 71 issues, which is similar to what the manual
-execution on low level found (77 issues). The service also provides a view on
-specific categories, as can be seen on \Cref{fig:results:coverity:defects}
+execution on the low level found (77 issues). The service also provides a view on
+specific categories, as can be seen in \Cref{fig:results:coverity:defects}
 
 \begin{figure}
 \begin{tikzpicture}
@@ -499,13 +507,13 @@ When xfsprogs was analysed for the first time by this service, 139 issues were
 found, but many were fixed shortly afterwards and the number of outstanding
 defects is not changing much, averaging between 60 and 70 issues at any
 specific revision. When compared with other open-source projects of similar
-size\footnote{100,000 to 400,000 lines of code.} analyzed by this service,
-xfsprogs oscilates around the average value, which is 0.5.
+size\footnote{100,000 to 400,000 lines of code.} analysed by this service,
+xfsprogs oscillates around the average value, which is 0.5.
 
 % ------------------------------------------------
 \subsection{Local analysis}\label{chap:results:coverity:local}
 
-This section analyses the results from local execution of Coverity on the
+This section analyses the results from the local execution of Coverity on the
 highest level of aggressiveness.
 
 In mkfs-specific files in version 4.6.0, 111 issues were found, while whole xfsprogs
@@ -555,7 +563,7 @@ if (read(fd, buf, size) < size) {
         // do something...
 \end{lstlisting}
 
-These two issues also illustrates the difference between the aggressivness
+These two issues also illustrate the difference between the aggressiveness
 level. The Gettext-related issue is reported only on high or custom level, but
 the malloc issue is reported also on medium level.
 
@@ -573,4 +581,4 @@ arithmetics are mixed.
 \section{Summary}\label{chap:results:summary}
 %----------------------------------------------------------------------
 
-\TODO{usefullness of the online services}
+\TODO{usefulness of the online services}
