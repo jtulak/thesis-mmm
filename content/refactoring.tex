@@ -21,6 +21,19 @@ would not have to maintain this so many patches up to date. There are two
 main patchsets which are accompanied by few small and enclosed changes that
 could be easily submitted independently.
 
+Naming convention used in this work is the same as what is internally used
+in xfsprog.
+\begin{desciption}
+\item[Option] Can be referred as a section. The highest-level argument of
+	mkfs, starting with a dash.  E.g. {\tt -b} or {\tt -d }. Most
+	options have a mandatory argument consisting of suboptions.
+\item[Suboption] Can be also referred as some section's options. Consists
+	of one or more items in a format {\tt name=value} separated by a
+	comma, but no space. The value can be optional, e.g. when the
+	suboption is a boolean flag.
+\end{description}
+
+
 %======================================================================
 \section{Development processes}\label{chap:refactoring:processes}
 %----------------------------------------------------------------------
