@@ -106,10 +106,15 @@ For information about its implementation, see
 \Cref{chap:refactoring:initialcodebase}. This tool creates a new XFS
 filesystem with given properties. It is, as is usual for core Unix
 utilities, a non-interactive program which accepts multiple arguments when
-called and prints out the properties of the newly created filesystem if
-successful, or prints an error and usage help when an error occurs.
+called (the basic synopsis is shown in \Cref{lst:xfs:synopsis}) and prints
+out the properties of the newly created filesystem if successful, or prints
+an error and usage help when an error occurs.
 
-\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily, language=Bash, numbers=none, numberstyle=\tiny\color{black},caption= {Synopsis of mkfs.xfs utility~\cite{mkfs.xfsMan}.}]
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=Bash, numbers=none,
+numberstyle=\tiny\color{black},
+caption={Synopsis of mkfs.xfs utility~\cite{mkfs.xfsMan}.},
+label={lst:xfs:synopsis}]
 mkfs.xfs [ -b block_size ] [ -d data_section_options ] [ -f ]
          [ -i inode_options ] [ -l log_section_options ] [ -n naming_options ]
          [ -p protofile ] [ -q ] [ -r real-time_section_options ]

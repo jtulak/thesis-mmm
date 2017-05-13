@@ -23,16 +23,37 @@ could be easily submitted independently.
 
 Naming convention used in this work is the same as what is internally used
 in xfsprog.
-\begin{desciption}
+\begin{description}
 \item[Option] Can be referred as a section. The highest-level argument of
 	mkfs, starting with a dash.  E.g. {\tt -b} or {\tt -d }. Most
 	options have a mandatory argument consisting of suboptions.
-\item[Suboption] Can be also referred as some section's options. Consists
+\item[Suboption] Can be also referred as some section's option. Consists
 	of one or more items in a format {\tt name=value} separated by a
 	comma, but no space. The value can be optional, e.g. when the
 	suboption is a boolean flag.
 \end{description}
 
+Look on the example in the \Cref{lst:refactoring:example}. The command has
+two options and two suboptions. The options are {\tt -f}, which does not
+have any argument and serves as a {\em force} flag, so mkfs does overwrite
+any existing filesystem on the target device.
+
+The second option is {\tt -d}, which has arguments for setting up
+non-default values for data section.  There are two used suboptions of this
+option: {\tt file} is only a flag, that tells mkfs that the target device
+is not a block device, but a regular file (and thus mkfs should not use
+direct IO, or compute blocksize differently). {\tt size} has its own
+argument and denotes the size of the data section, 10 GB in this case.
+Because nothing else is specified, the size of other sections is computed
+automatically. The full list of options is in \Cref{lst:xfs:synopsis} in
+\Cref{chap:xfs:mkfs}.
+
+\begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
+language=Bash, numbers=none, numberstyle=\tiny\color{black},caption=
+{An example of mkfs.xfs invocation.},
+label={lst:refactoring:example}]
+mkfs.xfs -f -d file,size=10G /foo/bar
+\end{lstlisting}
 
 %======================================================================
 \section{Development processes}\label{chap:refactoring:processes}
@@ -75,10 +96,11 @@ be accessed in the project's Git repository as a version 4.6. Git revision
 hash for this version is {\tt 09033e35}. In this revision, the parsing of
 user input works as follows.
 
-In {\tt main(int argc, char **argv)} function is a loop using a
-standard {\tt getopt} from {\tt unistd.h} to detect an option like {\tt -d} for data section or {\tt
--l} for log section. For options that has some arguments, a nested loop uses custom functions to
-parse specific suboptions and their values.
+In {\tt main(int argc, char **argv)} function is a loop using a standard
+{\tt getopt} from {\tt unistd.h} to detect an option like {\tt -d} for data
+section or {\tt -l} for log section. For options that has some arguments, a
+nested loop uses custom functions to parse specific suboptions and their
+values.
 
 As an example, here is the beginning of aforementioned loops, as it is in
 the code, and some issues with this code.

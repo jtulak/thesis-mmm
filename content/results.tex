@@ -281,8 +281,8 @@ Clang & 113 & 4 & 2597 \\
 \label{tab:results:gcc:4.6}
 \end{table}
 
-As is shown in \Cref{chap:results:codacy}, Codacy found two issues in
-this file too. Curiously, Codacy found two unused functions, while GCC
+As is shown in \Cref{chap:results:codacy}, Codacy found two issues in the {\tt
+proto.c} file too. Curiously, Codacy found two unused functions, while GCC
 found these issues:
 \begin{enumerate}
 	\item {\tt mkfs/proto.c:270}: comparison between signed and unsigned
@@ -290,7 +290,7 @@ found these issues:
 	\item {\tt mkfs/proto.c:332}: unused parameter 'mp'
 \end{enumerate}
 
-These issues are not in the two functions found by Codacy. However, the are
+These issues are not in the two functions found by Codacy. However, they are
 inside of functions called from the ones marked as unused by Codacy. It is
 possible that they were not reported because of this, but given that the
 mentioned Codacy issues are false positives and that Codacy did not found many
@@ -454,6 +454,14 @@ our analysis focusses is that for other tools we used the strictest settings
 available, thus, analysing relaxed approach on any other level is not
 comparable to other tools.
 
+Unlike CppCheck or the compilers, Coverity can also show examples of the data
+flow for which a defect can appear.  E.g. tracking multiple conditions and
+noting if true or false branch was taken. This is especially useful when the
+case is not clear and the path includes a longer chain of conditions over a
+larger part of the code. Both the online service and the locally-run
+application provides this information. However, it is not particularly useful
+in our comparison of what issues were found.
+
 % ------------------------------------------------
 \subsection{Online Service}\label{chap:results:coverity:online}
 
@@ -509,6 +517,38 @@ defects is not changing much, averaging between 60 and 70 issues at any
 specific revision. When compared with other open-source projects of similar
 size\footnote{100,000 to 400,000 lines of code.} analysed by this service,
 xfsprogs oscillates around the average value, which is 0.5.
+
+It is also useful to note that the defects are not distributed equally in the
+whole xfsprogs. When we look at the defects rate per component, seen in
+\Cref{tab:results:coverity:components}, we can see that the tools used by
+developers for e.g. debugging, or by advanced users ({\tt xfs\_copy}, {\tt
+xfs\_logprint}) have a higher rate than the tools intended for a general use,
+like {\tt mkfs}. The high rate in {\tt libxcmd} and {\tt libhandle} is caused
+by the small size of these two components. Both has only a single issue, but as
+{\tt libhandle} has under 500 lines, the average per 1000 lines makes it look
+worse.
+
+
+\begin{table}[h]
+\begin{tabular}{|l||r|r|r|r|r|r|r|}
+\hline
+ & libxfs & libxlog & xfs\_repair & xfs\_db & xfs\_copy & xfs\_fsr & xfs\_io  \\
+\hline
+Lines of code & 43,770 & 1,165 & 22,620 & 18,508 & 1,043 & 1,354 & 6,970  \\
+\hline
+Defect density & 0.80 & 0.86 & 0.44 & 0.49 & 2.88 & 0.74 & 0.00 \\
+\hline
+\hline
+ & xfs\_logprint & xfs\_quota & mkfs\_xfs & xfs\_growfs & libhandle & libxcmd & other \\
+\hline
+Lines of code & 2,616 & 4,037 & 3,540 & 408 & 493 & 1,338 & 27,539 \\
+\hline
+Defect density & 1.15 & 0.50 & 0.00 & 0.00 & 2.03 & 1.38 & 0.15 \\
+\hline
+\end{tabular}
+\caption{Defect density per component as reported by Coverity online service.}
+\label{tab:results:coverity:components}
+\end{table}
 
 % ------------------------------------------------
 \subsection{Local analysis}\label{chap:results:coverity:local}
@@ -581,4 +621,31 @@ arithmetics are mixed.
 \section{Summary}\label{chap:results:summary}
 %----------------------------------------------------------------------
 
-\TODO{usefulness of the online services}
+As we have seen, the results of the tools vary widely, both in types of issues
+the tools report and in their amount.  The mediocre results of CppCheck and
+Codacy can be probably attributed to the fact that we tested it on a production
+code which already passed a certain quality assurance and thus, the kinds of
+issues these tools are best capable of finding were already fixed.
+
+Coverity and both compilers were capable of finding less obvious defects, but
+the price for a too high sensitivity was a lot of reported issues with only a
+minimal, if any, effect, like the comparisons between signed and unsigned
+integers from GCC.
+
+In any case, this work shows that on a relatively error-free code, there is
+only a minimum of defects that would be reported by multiple tools. This makes
+it apparent that it is useful to use as many diverse methods in the analysis as
+possible.
+
+The most helpful tool from the tested ones was Coverity, not least because of
+its ability to show the flow of the program in which the defect can appear.
+However, the free analysis for open source projects is limited to more obvious
+defects and for non-open source projects, or for a detailed analysis, it
+requires a paid license.
+
+This analysis was done after the first patches were written and merged, but
+found minor issues only, which speaks well for the quality of mkfs, at least in
+terms of correctness with respect to the language standard. Whether the code is
+well structured or not, or if it does what is expected from it on a higher
+level, is not possible to assess with these tools.
+
