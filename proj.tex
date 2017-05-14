@@ -95,14 +95,20 @@
   %Abstract
   % abstrakt v ceskem jazyce
   abstract.cs={
-	  Tato práce popisuje průběh a smysl refaktoringu mkfs.xfs programu
-	  a následně srovnává řadu nástrojů pro statickou analýzu a
-	  verifikaci na refaktorovaném kódu.},
+	Tato práce popisuje průběh refaktoringu programu mkfs.xfs za účelem
+	zpřehlednění jeho kódu a vyčištění technického dluhu naakumulovaného za
+	dvacet let existence tohoto programu, a následně jeho statickou analýzu.
+	Použité nástroje (CppCheck, Coverity, Codacy, GCC, Clang) jsou srovnány z
+	hlediska počtu i typu nalezených chyb
+  },
   % abstrakt v anglickem jazyce
   abstract.en={
-	  This work describes the progress and the reason of a mkfs.xfs
-	  refactoring. Then it compares multiple tools for static analysis
-	  and verification of the refactored code.
+	This work describes the processes of refactoring mkfs.xfs program
+	for a purpose of refining its code and cleaning the technical debt
+	accumulated over 20 years of the program's existence. The mkfs.xfs
+	is then a subject to static analysis and the used tools (CppCheck,
+	Coverity, Codacy, GCC, Clang) are compared in terms of the number
+	and type of the found defects.
   }, 
   %Prohlaseni
   declaration={
@@ -126,9 +132,9 @@
 
 %Klicova slova (cesky, anglicky)
 \keywords[cs]{XFS, refaktoring, formální analýza, formální verifikace,
-Coverity, CPAChecker.}
+Coverity, Codacy, GCC, Clang, CppCheck.}
 \keywords[en]{XFS, refactoring, formal analysis, formal verification,
-Coverity, CPAChecker.}
+Coverity, Codacy, GCC, Clang, CppCheck.}
 
 %Prohlaseni
 %\declaration{Prohlašuji, že jsem tuto bakalářskou práci vypracoval samostatně pod vedením pana X...
