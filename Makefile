@@ -48,3 +48,6 @@ clean:
 
 pack:
 	tar czvf bp-xjmeno.tar.gz *.tex *.bib *.bst ./fig/* ./cls/* Makefile Changelog
+
+rtf:
+	latex2rtf $(CO).tex

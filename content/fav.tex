@@ -115,11 +115,11 @@ However, it also has two big disadvantages. It requires a model of the environme
 \begin{wrapfigure}{r}{8cm}
   \centering
  \includegraphics[width=8cm,keepaspectratio]{fig/dinning-symmetry} % Or .pdf
-\caption{Symmetries and the dinning philosophers~\cite{KrenaVojnarOverview}.}
-\label{fig:fav:dinning}
+\caption{Symmetries and the dining philosophers~\cite{KrenaVojnarOverview}.}
+\label{fig:fav:dining}
 \end{wrapfigure}
 
-The methods used for this include {\em symmetry reduction} in cases where it is not important which specific entity (if there is more entities of the same type is in a specific state). See \Cref{fig:fav:dinning} for an example of symmetry in the well known dinning philosophers problem.
+The methods used for this include {\em symmetry reduction} in cases where it is not important which specific entity (if there is more entities of the same type is in a specific state). See \Cref{fig:fav:dining} for an example of symmetry in the well known dining philosophers problem.
 
 Other solutions can be to use only one of many possible paths for the ordering of concurrent actions that are independent of each other and compress the size of states by using pointers to the previous state for values that did not change. Or the tool can evaluate the properties at the same time when a new state is generated, and stop immediately once it is clear that this prefix cannot be accepted by the automata denoting correctness specification.
 

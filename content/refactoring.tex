@@ -354,13 +354,15 @@ Jan Tulak (4):
 \subsection{Description of important changes}
 %.....................................................
 
-The key part of this patchset is the creation of {\tt opt\_params} table.
+The key part of this patchset is the creation of {\tt opt\_params} table,
+shown on \Cref{lst:refactoring:optparams}.
 It is a structure that is holds all the important values for a specific
-option in one place, easily acessible and consistent across whole file.
+option in one place, easily accessible and consistent across whole file.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=C, numbers=none, numberstyle=\tiny\color{black},
-caption= {Definition of the table.}]
+caption= {Definition of the table.},
+label={lst:refactoring:optparams}]
 struct opt_params {
 	const char	name;
 	const char	*subopts[MAX_SUBOPTS];
@@ -402,7 +404,7 @@ The {\tt subopt\_param} has the following members:
     so we can access the right item both in subopt\_params and subopts.
 
 \item[seen] {\em INTERNAL}
-    Do not set this flag when defining a subopt. It is used to remeber that
+    Do not set this flag when defining a subopt. It is used to remember that
     this subopt was already seen, for example for conflicts detection.
 
 \item[str\_seen] {\em INTERNAL}
@@ -442,6 +444,13 @@ The {\tt subopt\_param} has the following members:
     sets what is used with simple specifying the subopt (-d file).
     A special SUBOPT\_NEEDS\_VAL can be used to require a user-given
     value in any case.
+
+    It was later revealed that the name of this field is confusing and can
+    be mistaken for a default value in the sense of "user did not specify
+    anything." As this led to an incorrect configuration for an option
+    (albeit semi-internal one, used only by developers for testing
+    purposes), we proposed a name change to {\tt flagval}. This change is a
+    part of the next set.
 		
 \end{description}
 
