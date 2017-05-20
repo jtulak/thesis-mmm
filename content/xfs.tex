@@ -8,8 +8,8 @@
 XFS is a journaling filesystem created by SGI in 1993. The new filesystem,
 intended as a powerful replacement of EFS with the expectation of growing
 amount of data in the future was first released in IRIX 5.3 in
-1993~\cite{xfsOriginal}. Linux port began in 1999 and since 2002 is
-XFS accessible in the mainline Linux Kernel~\cite[Chap. 1.2,
+1993~\cite{xfsOriginal}. The Linux port began in 1999 and since 2002
+XFS has been accessible in the mainline Linux Kernel~\cite[Chap. 1.2,
 1.3]{xfsHistory}.
 
 XFS is actively developed for all its history since 1993, making it one of
@@ -24,7 +24,7 @@ machines~\cite[40:25]{fsOrigin}.
 
 \hline
 \hline
-max fs size & $16$ TiB & $16$ TiB & $16$ EiB& $256$ TiB\\
+max fs size & $1$ EiB & $16$ TiB & $16$ EiB& $256$ TiB\\
 \hline
 max file size & $8$ TiB & $16$ TiB & $8$ EiB & $256$ TiB\\
 \hline
@@ -33,57 +33,74 @@ max files & $2^{32}$ & $2^{32}$& $2^{64}$ & $2^{32}$\\
 date resolution & $1$ s & $1$ ns & $1$ ns & $100$ ns\\
 \hline
 \end{tabular}
-\caption{Comparison of various filesystems and their limits. Sources:~\cite{inodesInLinux,NTFS1,NTFS2,NTFSfiletime,XFSforLinux}.}
+\caption{Comparison of various filesystems and their limits.
+Sources:~\cite{inodesInLinux, NTFS1, NTFS2, NTFSfiletime, XFSforLinux,
+RHELfsLimitations}.}
 \label{tab:xfs:comparison}
 \end{table}
 
 
 
-Because of its capabilities, XFS is used also by well known institutions
-like CERN or Fermilab~\cite{XFSforLinux} for storing large amounts of data.
-Unlike most of other Linux filesystems, XFS is a 64bit fs, meaning it
+Because of its capabilities, XFS is used by well known institutions
+like CERN and Fermilab~\cite{XFSforLinux} for storing large amounts of data.
+Unlike most other Linux filesystems, XFS is a 64bit filesystem, meaning it
 provides far greater limits for storage and file size\footnote{At least
 matured ones. Newer filesystems, like Btrfs, are also 64bit, but have not
 yet reached stability required in business sector.}, but its architecture
 also offer great scalability in terms of parallel I/O.
 
 XFS as a whole is separated into three main projects: First, there is the
-XFS filesystem itself, in the form of a kernel module. Then a set of tools
+XFS filesystem itself, in the form of a driver. Then a set of tools
 in a package called xfsprogs is tightly connected with XFS filesystem and
 contains programs useful or necessary for creation and manipulation of the
 filesystem. Among the tools included are {\tt mkfs.xfs}, on which this
-thesis is focused, but also other tools: {\tt fsck.xfs}, {\tt xfs\_io},
+thesis is focused, but also other tools: {\tt xfs\_io},
 {\tt xfs\_growfs}, et cetera. And finally, there are xfstests, which is a
-test suite containing hundreds of shell scripts that verifying the
+test suite containing hundreds of shell scripts used for verifying the
 behaviour of entire XFS chain (from mkfs to the kernel code). This project
-is also partially used by other filesystems. There are among others tests
-for ext4, overlay fs and btrfs.
+is also partially used by other filesystems.
 
-Except for the xfstests test suite, xfsprogs also uses an automatical static analysis from Coverity~\cite{CoverityXfsprogs}. However, to see detailed information and defects there, one must be approved by existing members of the project.
+In addition to the xfstests test suite, xfsprogs also uses an automatic
+static analysis from Coverity~\cite{CoverityXfsprogs}. However, to see
+detailed information and defects there, one must be approved by existing
+members of the project.
 
 
 %======================================================================
 \section{XFS Architecture overview}\label{chap:xfs:overview}
 %----------------------------------------------------------------------
 
-When a XFS partition is formated, up to three areas are created on the disk: Data section is always present. An optional real-time section is omitted by default. Log section has to exist always but can be placed on a different device. The data part is then in fact split into multiple de facto independent filesystems called Allocation Groups, that handle space allocation and allows for higher parallelism, as most operations can be done on each Allocation Group independently on the others. The log section can be also internal to each of the Allocation Groups.
+When a XFS partition is formated, up to three areas are created on the
+disk: Data section is always present. An optional real-time section is
+omitted by default. The log section must always exist, but can be placed on a
+different device. The data part is then split into multiple de
+facto independent regions called Allocation Groups, which handle space
+allocation and allows for higher parallelism, as most operations can be
+done on each Allocation Group independently on the others. The log section
+may be internal to one of the Allocation Groups.
 
-As each Allocation Group is a de facto standalone filesystem, each contains
-the superblock and block and inode allocations and the only global
-information, maintained by the first (primary) AG is free space and total
+As each Allocation Group is a de facto standalone region, each contains
+a superblock as well as block and inode allocation structures, and the only global
+information maintained by the first (primary) AG is free space and total
 inode counts across the whole filesystem as can be seen
 on \Cref{fig:xfs:primaryAG}.
 
 \begin{figure}
   \centering
  \includegraphics[width=13cm,keepaspectratio]{fig/primary-ag} % Or .pdf
- \caption{Primary AG right after mkfs~\cite[Ch. 3]{xfsStructure}.}
+ \caption{Primary AG immediately after mkfs~\cite[Ch. 3]{xfsStructure}.}
 \label{fig:xfs:primaryAG}
 \end{figure}
 	
-Real-time section is dedicated for files with a real-time attribute bit set, and operations with these files should have predictable latencies~\cite{xfsRealtime}. Log section is used to recover from situations like power failure on the next mount~\cite{xfsStructure,xfsman}.
+The XFS real-time section is dedicated for files with a real-time attribute
+bit set, and operations with these files should have predictable
+latencies~\cite{xfsRealtime}. The log section is used for metadata journaling, to recover from situations like power failure on the next mount~\cite{xfsStructure,xfsman}.
 
-When created on striped RAID\footnote{Striped RAID is e.g. RAID 0, where logically sequential data are split into a number of physical blocks and written on multiple disks interleaved. For a RAID 0 on two drives it means that odd blocks are located on one drive and even blocks on the other.}, XFS can be informed about it and align all allocations and size to the stripe unit to maximize speed.
+When created on striped RAID\footnote{Striped RAID is e.g. RAID 0, where
+logically sequential data are split into a number of physical blocks and
+written on multiple disks interleaved. For a RAID 0 on two drives it means
+that odd blocks are located on one drive and even blocks on the other.},
+XFS can be informed about the underlying storage geometry and align all allocations and size to the stripe unit to maximize speed.
 
 As a native Unix filesystem, XFS uses {\em inodes} as a data structure to save information about files and directories. The first of the three parts of an inode (see \Cref{fig:xfs:inode}), core, contains the basic information, describing what the inode represents. Some example of the data in this field is the id of the user and group owning this inode, size and modification time.
 
@@ -121,7 +138,9 @@ mkfs.xfs [ -b block_size ] [ -d data_section_options ] [ -f ]
          [ -s sector_size ] [ -L label ] [ -N ] [ -K ] device
 \end{lstlisting}
 
-An example of such usage is {\tt mkfs.xfs -f /dev/sda1}. This simple example creates a XFS filesystem on device {\tt /dev/sda1} even if an existing filesystem existed there -- thus the {\tt -f} (as force) flag. For the whole description of mkfs.xfs usage it is better to refer to mkfs.xfs manual page. What is important to note here is that parsing the input arguments and computing inner values based on these inputs makes most of the circa 3,500\footnote{Before the merge of the last part of my changes. With these changes, mkfs has over 4,000 lines.} lines of code.
+An example of such usage is {\tt mkfs.xfs -f /dev/sda1}. This simple
+example creates a XFS filesystem on device {\tt /dev/sda1} even if a
+filesystem already existed there -- thus the {\tt -f} (as force) flag. For the whole description of mkfs.xfs usage it is better to refer to mkfs.xfs manual page. What is important to note here is that parsing the input arguments and computing inner values based on these inputs makes most of the circa 3,500\footnote{Before the merge of the last part of my changes. With these changes, mkfs has over 4,000 lines.} lines of code.
 
 
 %======================================================================
@@ -144,7 +163,7 @@ run\footnote{An example of the groups: {\tt mkfs, quick, all, dangerous,
 auto, quota, attr, symlink, \ldots}.}
 
 These tests do not analyse any program (either its source code, or the
-compiled binary), but only the results of running these programs, be it a
-created filesystem, or printed messages. Because xfstests do not employ any
+compiled binary), but only the results of running these programs, i.e.
+printed messages, filesystem behaviors, etc. Because xfstests do not employ any
 formal technique and focus on completely different means of testing, it is
 not compared with other tools in this work.

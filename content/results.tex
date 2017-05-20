@@ -98,7 +98,7 @@ which some are false positives), but also in detecting specific issues. For
 example, revision {\tt a9dad670} fixed 54 issues according to GCC, but
 according to Coverity, it caused 4 new and did not fix anything.
 
-Bellow, we have both a simple statistical analysis of what each
+Below, we have both a simple statistical analysis of what each
 tool found and a more detailed look at some specific issues and revisions,
 especially where the tools have seriously different results.
 
@@ -140,7 +140,7 @@ some time later, when the specific variable was turned to unsigned, but not
 every use was fully converted.
 
 Neither of these issues is of any seriousness. Every found check of an
-unsigned variable to being lower than zero is, in fact, a less-or-equal
+unsigned variable being less than zero is, in fact, a less-or-equal
 check. \Cref{lst:results:sectorsize} shows the specific code for both cases
 of offending sectorsize. Thus, {\tt unsigned\_variable <= 0} may be
 misleading, but functionally is equivalent to {\tt unsigned\_variable ==
@@ -179,11 +179,11 @@ Despite this, the results of those two tools are very similar when compared
 to others, so we use only CppCheck in further comparison with other tools.
 CppCheck is selected because we have greater control over it, unlike cloud
 service Codacy, and on this sample produced no false positives, although the
-usfullness of some reports is arguable.
+usefulness of some reports is arguable.
 
 The low number of issues found can be attributed to the detailed review of all
 patches submitted to the project. If most issues are usually spotted during the
-development in the patches and fixed before they are merged into the code, it
+development of the patches and fixed before they are merged into the code, it
 leaves space for only more complex and not so obvious issues, which CppCheck
 analysis is not capable of finding and a stronger tool is necessary.
 
@@ -220,10 +220,10 @@ reported these two issues:
 However, these functions are used in {\tt mkfs/xfs\_mkfs.c} file, thus they are
 false positives. Also, CppCheck found two places on which {\tt sectorize} is
 checked to be less than zero, but Codacy reports it only once. Curiously, the
-same issue appears on two places not far away, and in both cases, it is in this
+same issue appears in two places not far away, and in both cases, it is in this
 exact condition as can be seen in \Cref{lst:results:sectorsize} in
 \Cref{chap:results:cppcheck}, just inside of different blocks, but still in the
-same function and path to both places is possible. Why Codacy does report only
+same function and path to both places is possible. Why Codacy reports only
 one of those issues is unclear.
 
 
@@ -338,12 +338,12 @@ kinds:
 \begin{enumerate}
 	\item {\tt mkfs/xfs\_mkfs.c:1487}: {\em comparison is always false due
 		to limited range of data type}
-	\item {\tt mkfs/xfs\_mkfs.c} multiple occurencies: {\em passing
+	\item {\tt mkfs/xfs\_mkfs.c} multiple occurences: {\em passing
 		argument 2 of 'illegal' discards 'const' qualifier from
 		pointer target type}
 \end{enumerate}
 
-Clang detected all the 12 occurrences the second issue but missed the first,
+Clang detected all the 12 occurrences of the second issue but missed the first
 comparison issue. The offending line for the missed issue is shown in
 \Cref{lst:results:logagnoComparison}. A closer look on this line reveals that
 there is an explicit type casting. The new type is a signed integer. However,
@@ -426,7 +426,7 @@ In this revision, Clang does not report any new kind of issues against version
 
 Coverity, when it is run manually in the docker container, found a comparable
 number of issues as GCC and Clang in mkfs-specific files. On the other hand,
-the online version did not found any issues in mkfs on a recent (4.11)
+the online version did not find any issues in mkfs on a recent (4.11)
 version~\cite{CoverityXfsprogs}, compared to 111 found on a manual run with the
 highest level of aggressiveness. What effect the aggressiveness level has can
 be seen in \Cref{tab:results:coverity:levels}. The numbers in this table are
@@ -481,6 +481,7 @@ specific categories, as can be seen in \Cref{fig:results:coverity:defects}
 \begin{tikzpicture}
 	\begin{axis}[
 		xlabel={Outstanding defects},
+		ytick={0,1,2,3,4,5,6,7,8,9,10},
 		yticklabels={null pointer dereference,
 			control flow issues,
 			error handling issues,
@@ -510,7 +511,7 @@ specific categories, as can be seen in \Cref{fig:results:coverity:defects}
 \end{figure}
 
 This service is used since 2013 and since xfsprogs was first analysed, a total
-number of 273 issues was found. Of these, 176 was fixed and 26 dismissed as
+number of 273 issues was found. Of these, 176 were fixed and 26 dismissed as
 intentional or false positives. The average defect density according to this
 analysis is currently 0.52 issues per 1,000 lines, with 135,302 lines analysed.
 
@@ -584,7 +585,7 @@ label={lst:results:dereferencePrintf}]
 printf(_("%s version %s\n"), progname, VERSION);
 \end{lstlisting}
 
-These issues can be probably considered false positives, or at least
+These issues can probably be considered false positives, or at least
 intentional. A brief search in Gettext implementation suggests that if Gettext
 cannot allocate memory for a translated string, it simply returns the original
 one. For example, see file {\tt /gettext-runtime/intl/dcigettext.c}, line 391

@@ -10,8 +10,8 @@ In this chapter, we discuss which techniques and models of formal analysis and v
 We are analysing a single-threaded application. This greatly reduces the
 state space and means that we also can use methods that do not allow for
 concurrency. On the other side, given that the program accepts user input,
-some variables has an infinite number of potential values and any method
-based on state space checks has to cope with this fact.
+some variables have an infinite number of potential values and any method
+based on state space checks must cope with this fact.
 
 %With respect to possible difficulties with implementing various advanced
 %methods and their required proficiency, it was decided to start with well-known
@@ -60,7 +60,7 @@ Docker is a specific implementation~\cite{docker} of containers.} based on Fedor
 every tool and every run. Image with the compilers and CppCheck are published
 in Docker Hub and all the recipes to build and use them are provided with
 this work. Image with Coverity could not be published because it contains
-confident information\footnote{Jan Ťulák had an access to Red Hat Coverity license
+confidential information\footnote{Jan Ťulák had an access to Red Hat Coverity license
 server as a Red Hat employee. However, the server information and some tools
 	Red Hat provided with Coverity are considered confidential.}.
 
@@ -91,8 +91,8 @@ are modified to contain only the single specific tool we need, but no other.
 %%.....................................................
 %Docker image: {\tt jtulak/cpacheck}~\cite{dockerCPAChecker}
 %
-%CPAChecker can not be run on a full source code, but requires
-%preprocessing~\cite{cpacheckerGettingStarted}, which has to be partially
+%CPAChecker can not be run on a full source code tree, but requires
+%preprocessing~\cite{cpacheckerGettingStarted}, which must be partially
 %remade for every tested revision (depending on what and how much changed),
 %       only selected commits were tested.
 %_____________________________________________________
@@ -118,7 +118,7 @@ CppCheck on whole {\tt xfsprogs/mkfs/} directory was:
 %.....................................................
 Coverity was used both manually in a Docker container, and automatically
 using the public Coverity service for open source projects which is part
-of standard xfsprogs development process, to compare the results between
+of the standard xfsprogs development process, to compare the results between
 those two instances.
 
 Furthermore, in the local analysis, four levels of analysis aggressiveness were
@@ -136,7 +136,7 @@ All levels have enabled everything that a previous, lower level has, plus some
 additional checks. The medium level uses low level plus enables some other
 checks, including parse warnings, infinite loops, some resource leaks checks,
 etc. The high level then adds e.g. integer overflow detections and more checks
-for infinite loops. A special, level, enabled by a different flag for {\tt
+for infinite loops. A special, level enabled by {\tt --all} flag for {\tt
 cov-analysis}, then enables almost all checkers, with only a few minor
 exceptions. For the full (rather long) list of what checkers are enabled on every
 level, consult the {\tt cov-analysis} manual~\cite{coverityMan}.
@@ -200,7 +200,7 @@ included in the digital attachment to this work.
 \subsection{GCC}
 %.....................................................
 The {\em GNU project C and C++ compiler} is used for compiling xfsprogs and it
-has some static analysis capabilities because it has to understand the code to
+has some static analysis capabilities because it must understand the code to
 compile it. The only difference in its use from standard configuration is to
 use the most strict reporting.
 
@@ -222,7 +222,7 @@ According to Clang's {\tt scan-build} description, the tool replaces certain
 environmental variables to achieve the same result. However, from the nature of
 tool-specific containers used for the tests, binary replacement avoids
 uncertainty about whether the environmental variables were correctly taken into
-the account in this specific Autotools configuration without the usuall
+the account in this specific Autotools configuration without the usual
 consequences of manipulating with system files without the knowledge of a
 package manager.
 
@@ -299,11 +299,11 @@ multiple issues with the same message (e.g. because variable with name {\tt
 				       foo} was declared, but not used, in
 				       multiple functions) and later some of
 these issues are fixed, the number of issues is correct, but the indicated
-lines may be incorrect. This is because the script has to cope with changing
+lines may be incorrect. This is because the script must cope with changing
 code; an issue on line X in one revision can be on line Y in another one, and
 that would require employing much more complex algorithms that would use
 information from git and understand which lines moved where. Thus, in such
-case, the behaviour selecting specific instancies of the same kind of issue is
+cases, the behaviour selecting specific instances of the same kind of issue is
 undefined.
 
 
@@ -342,6 +342,6 @@ proved a much more complex task. Every tool describes the same issue with
 different words, so to be able to automatically compute any differences, such
 an algorithm would have to understand the issue in all details. Thus,
 cross-tool differences are not computed automatically, but manually for the
-cases where it is reasonable given to the number of issues that has to be
+cases where it is reasonable given to the number of issues that must be
 analysed. Standard Unix tools like {\tt diff} and {\tt grep} were used in these
 cases.

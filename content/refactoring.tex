@@ -5,24 +5,24 @@
 \chapter{Refactoring of mkfs.xfs} \label{chap:refactoring}
 %----------------------------------------------------------------------
 
-The idea of changes described in this work is to rewrite a complex and
-chaotic code for parsing user input with a table that holds values like
-minimum/maximum, default values, conflicts and others. Thus, instead of
-ad-hoc conditions and operations, there will be just one global structure,
-well documented and easily readable and extendable. This structure should
-hold also the user-entered values and limit code and variables duplication
-as much as possible.
+The primary goal of the changes described in this work is to rewrite a
+complex and chaotic code for parsing user input with a table that holds
+values like minimum/maximum, default values, conflicts and others. Thus,
+instead of ad-hoc conditions and operations, there will be just one global
+structure, well documented and easily readable and extendable. This
+structure should hold also the user-entered values and limit code and
+variables duplication as much as possible.
 
-During the development, we had to repeatedly solve conflicts with changes
+During development, we had to repeatedly solve conflicts with changes
 from other developers that got merged into xfsprogs while we were still
 working on my changes. That led me to cut the work into multiple parts.
 That way, others could benefit from changes that were already done and we
-would not have to maintain this so many patches up to date. There are two
-main patchsets which are accompanied by few small and enclosed changes that
+would not have to maintain so many patches at any given time. There are two
+main patchsets which are accompanied by several small and enclosed changes that
 could be easily submitted independently.
 
-Naming convention used in this work is the same as what is internally used
-in xfsprog.
+The naming convention used in this work is the same as what is internally used
+in xfsprogs:
 \begin{description}
 \item[Option] Can be referred as a section. The highest-level argument of
 	mkfs, starting with a dash.  E.g. {\tt -b} or {\tt -d }. Most
@@ -40,13 +40,12 @@ any existing filesystem on the target device.
 
 The second option is {\tt -d}, which has arguments for setting up
 non-default values for data section.  There are two used suboptions of this
-option: {\tt file} is only a flag, that tells mkfs that the target device
+option: {\tt file} is only a flag, which tells mkfs that the target device
 is not a block device, but a regular file (and thus mkfs should not use
 direct IO, or compute blocksize differently). {\tt size} has its own
 argument and denotes the size of the data section, 10 GB in this case.
 Because nothing else is specified, the size of other sections is computed
-automatically. The full list of options is in \Cref{lst:xfs:synopsis} in
-\Cref{chap:xfs:mkfs}.
+automatically.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=Bash, numbers=none, numberstyle=\tiny\color{black},caption=
@@ -69,21 +68,21 @@ used for some less
 important and more day to day issues. The code is hosted in a Git repository,
 but only selected maintainers have a write access.
 
-Any commit an author wants to get merged into the code has to be submitted
-as a patch to the mailing list. There the patch awaits a review -- that is,
-some other developer has to check the changes and append his or her
-signature to this patch. Once the patch is reviewed and if there are no
-objections, the maintainer will merge it in a batch with other changes once
-in a time (for xfsprogs, it is usually about twice a month).
+Any commit an author wants to get merged into the code must be submitted as
+a patch to the mailing list. There the patch awaits a review -- that is,
+some other developer must check the changes and append his or her signature
+to this patch. Once the patch is reviewed and if there are no objections,
+the maintainer will merge it in a batch with other changes (for xfsprogs,
+this usually occurs about twice a month).
 
 However, there are many unwritten rules and customs, that are not apparent
 at first and a new developer finds about them usually only when she or he
 breaks such a rule.
 
 An example of such an unwritten rule is the exact coding style and the use of
-a code style checking script {\tt checkpatch.pl} originating in Kernel
-community and is part of Linux Kernel source. Such a rules has their
-meaning and helps to keep a consistent style throughout xfsprogs, but the
+a code style checking script {\tt checkpatch.pl} which originated in Kernel
+community and is part of Linux Kernel source. Such rules have their
+place, and helps to keep a consistent style throughout xfsprogs, but the
 fact that they are not documented causes unnecessary issues and delays.
 
 %======================================================================
@@ -96,9 +95,9 @@ be accessed in the project's Git repository as a version 4.6. Git revision
 hash for this version is {\tt 09033e35}. In this revision, the parsing of
 user input works as follows.
 
-In {\tt main(int argc, char **argv)} function is a loop using a standard
+In the {\tt main(int argc, char **argv)} function is a loop using a standard
 {\tt getopt} from {\tt unistd.h} to detect an option like {\tt -d} for data
-section or {\tt -l} for log section. For options that has some arguments, a
+section or {\tt -l} for log section. For options that have arguments, a
 nested loop uses custom functions to parse specific suboptions and their
 values.
 
@@ -153,7 +152,7 @@ while ((c = getopt(argc, argv, "b:d:i:l:L:m:n:KNp:qr:s:CfV")) != EOF) {
 \end{lstlisting}
 
 While the {\tt -f} option is simple, in case of {\tt -b
-log=XX}\footnote{Here and on other places, the block option is used as an
+log=XX}\footnote{Here and in other places, the block option is used as an
 example, because this option has only two suboptions, so it can be shown in
 full if needed.} we can see how the parsing can get complex. The code tests
 if the value is not empty and if it is, it raises an error. Then it tests
@@ -166,33 +165,34 @@ specification of the same option is prohibited\footnote{Respecification is
 	computed based on this value and then the blocksize is changed.
 	Thus, any following use of blocksize will have a value different
 	than what was used for the first computation. This could be
-	countered by computing all values after all options are parsed, yet
-	it would still be ambiguous and might behave differently than the
-	user expected. Forbidding it is a cleaner and safer approach.} Mkfs
-	allows to specify the block size both in explicit size in bytes and
-	in a logarithmic scale, but only one of these options can be used
-	at a time. So the code also has to check if the other variant was
-	used and compute both values.
+countered by computing all values after all options are parsed, yet it
+would still be ambiguous and might behave differently than the user
+expected. Forbidding it is a cleaner and safer approach.} mkfs.xfs allows
+to specify the block size both as an explicit size in bytes or in a
+logarithmic scale, but only one of these options can be used at a time. So
+the code must also check if the other variant was used and compute both
+values.
 
-Some options has a test directly within this assignment for conflicting
+Some options have a test directly within this assignment for conflicting
 options, others simply set up the value and test the conflicts later, after
-the {\tt getopt} loop. Yet another options uses both of these ways, depending on what the author of
-each change considered a better solution, how it was required to achieve a given
-functionality or how this part of code was changed over time.
+the {\tt getopt} loop. Other options use both of these methods, depending
+on what the author of each change considered a better solution, how it was
+required to achieve a given functionality or how this part of code was
+changed over time.
 
-You can see that most of the things happening in this part of code are
-rather generic -- all options has to check for the respecification, whether
+We can see that most of the work happening in this part of code is
+rather generic -- all options are checked for respecification, whether
 a required value is present, or possibly whether the value is in a certain
 range of valid values.
 
-However, nothing of these universal tasks is automated -- every single
-option has to reimplement the same tests. Some options has almost all logic
-in it's {\tt case} where it is at leas in one place. But options with more
-complex dependencies and conflicts have only part of it's logic there and
-the rest of it is in a section of code following the main loop, in ad-hoc
-tests and computations.
+However, none of these universal tasks is automated -- every single
+option must reimplement the same tests. Some options have almost all logic
+in it's {\tt case} statement, where it is at leas in one place. But options
+with more complex dependencies and conflicts have only part of their logic
+there and the rest of it is in a section of code following the main loop,
+in ad-hoc tests and computations.
 
-To further complicate it, some parts of {\tt mkfs.xfs} are more than 20
+To further complicate situation, some parts of {\tt mkfs.xfs} are more than 20
 years old and the coding style and the general approach to specific things
 changed since then, but the old code did not. If such old code needs a
 change, there is always a risk that the editing programmer assumes a
@@ -205,7 +205,7 @@ variables, it is difficult to keep all the important ones in a mental image
 of the code and always use the correct one. Many of these variables are
 unnecessary or reduntant, so in some cases, the values are copied from one
 to another and if a change is put into a wrong place, a specific condition
-may cause that the changed value is overwritten later on with the old one,
+may cause the changed value to be overwritten later on with the old one,
 etc.
 
 It is easy to see what could go bad in this: When changing one option, it was
@@ -218,16 +218,16 @@ in another option, could overwrite the value and cause a conflict without a
 notice.
 
 Any new option required a careful reading through the existing code and
-possibly place some checks on multiple places. Thus it was difficult to know
+possibly the placement new checks in multiple places. Thus it was difficult to know
 when any value is checked and safe for use in further computations.
+
+HERE
 
 
 The consequence of these issues is that {\tt mkfs.xfs} did a bad job of
-validating user input from the command line and an unexpected value could
-cause that the worst case; the created filesystem could fail after some use
-and lose user's data. Even if an issue was detected and the specific
-error fixed, the minimal code reuse meant that other options could still be
-susceptible to the same or similar issue.
+validating user input from the command line. Even if an issue was detected
+and the specific error fixed, the minimal code reuse meant that other
+options could still be susceptible to the same or similar issue.
 
 %======================================================================
 \section{First patchset}\label{chap:refactoring:first}
@@ -267,9 +267,9 @@ factoring xfs\_mkfs.c into something more than a bunch of spagetti...
 
 When we joined the XFS team and began with the refactoring in
 2015~\cite{myFirstPatches}, we picked up this patchset and brought it up to
-date with the codebase that in some parts changed substantially in the two
-years. Once the patches were applicable for the current code, we began
-fixing functional issues and adding further changes.
+date with the codebase that in some parts changed substantially in the
+preceeding two years. Once the patches were applicable for the current
+code, we began fixing functional issues and adding further changes.
 
 
 This lasted until May 2016, when this patchset was merged into the upstream
@@ -357,7 +357,7 @@ Jan Tulak (4):
 The key part of this patchset is the creation of {\tt opt\_params} table,
 shown on \Cref{lst:refactoring:optparams}.
 It is a structure that is holds all the important values for a specific
-option in one place, easily accessible and consistent across whole file.
+option in one place, easily accessible and consistent across the whole file.
 
 \begin{lstlisting}[frame=none, basicstyle=\footnotesize\ttfamily,
 language=C, numbers=none, numberstyle=\tiny\color{black},
@@ -388,11 +388,11 @@ The meaning of the specific fields is this:
 
 \item[subopts] {\em MANDATORY}
   Subopts is a list of strings naming suboptions. In the example above,
-  it would contain "file". The last entry of this list has to be NULL.
+  it would contain "file". The last entry of this list must be NULL.
 
 \item[subopt\_params] {\em MANDATORY}
   This is a list of structs tied with subopts. For each entry in subopts,
-  a corresponding entry has to be defined.
+  a corresponding entry must be defined.
 \end{description}
 
 
@@ -400,7 +400,7 @@ The {\tt subopt\_param} has the following members:
 \begin{description}
 \item[index] {\em MANDATORY}
     This number, starting from zero, denotes which item in subopt\_params
-    it is. The index has to be the same as is the order in subopts list,
+    it is. The index must be the same as is the order in subopts list,
     so we can access the right item both in subopt\_params and subopts.
 
 \item[seen] {\em INTERNAL}
@@ -409,7 +409,7 @@ The {\tt subopt\_param} has the following members:
 
 \item[str\_seen] {\em INTERNAL}
     Do not set. It is used internally for respecification, when some options
-    has to be parsed twice - at first as a string, then later as a number.
+    must be parsed twice - at first as a string, then later as a number.
 
 \item[convert] {\em OPTIONAL}
     A flag signalling whether the user-given value can use suffixes.
@@ -417,17 +417,17 @@ The {\tt subopt\_param} has the following members:
     set it to true.
 
 \item[is\_power\_2] {\em OPTIONAL}
-    An optional flag for subopts where the given value has to be a power
+    An optional flag for subopts where the given value must be a power
     of two.
 
 \item[conflicts] {\em MANDATORY}
     If your subopt is in a conflict with some other option, specify it.
     Accepts the .index values of the conflicting subopts and the last
-    member of this list has to be LAST\_CONFLICT.
+    member of this list must be LAST\_CONFLICT.
 
 \item[minval, maxval] {\em OPTIONAL}
-    These options are used for automatic range check and they have to be
-    always used together in pair. If you do not want to limit the max value,
+    These options are used for automatic range checking and they have to be
+    always used together in a pair. If you do not want to limit the max value,
     use something like UINT\_MAX. If no value is given, then you must either
     supply your own validation, or refuse any value in the 'case
     X\_SOMETHING' block. If you forget to define the min and max value, but
@@ -522,17 +522,16 @@ case 'b':
 \end{lstlisting}
 
 Another important issue fixed in this set was the behaviour difference when
-mkfs.xfs is run to create a filesystem on a block device and in a file on
+mkfs.xfs is run to create a filesystem on a block device vs. in a file on
 another filesystem.
 
-The issue was that if the target was a file, but {\tt -d file} was not
-specified, mkfs behaved as if the target is a block device. That however
-meant, that if the underlying block device had e.g. sector size 512B, on
-that a filesystem with sector size 4kB was created, then mkfs used the
-(incorrect) 512B size. On top of that, mkfs also used direct IO bypassing
-caches in the operating system and when on an SSD, called {\tt discard}
-ioctls, erasing changes that the user made to the file before
-creating the filesystem and possibly other data too.
+The issue was that if the target was a file, but {\tt -d file} is not
+specified, mkfs behaved as if the target is a block device. That
+meant, however, that if the underlying block device had e.g. sector size
+512B, on which a filesystem with sector size 4kB existed, then, when
+creating a new filesystem in a file, mkfs used the (incorrect) 512B size of
+the physical device and ignored the value used in the intermediate layers.
+
 
 This was mitigated by automatic detection of whether the target is a
 regular file or a block device, and by changing the flow of the program on
@@ -554,11 +553,11 @@ single option.
 %----------------------------------------------------------------------
 
 Once this change was merged and provided a stable point so we did not have to
-keep so much code in my own local repository up to date with upstream, we
+keep so much code in our own local repository up to date with upstream, we
 began to work on the second set of changes. We submitted an
 RFC of these
 changes in December 2016~\cite{secondSetRFC}. Such a big and complex
-changes are something that most of the developers postpone, so it is
+change is something that most of the developers postpone, so it is
 usually reviewed only by the maintainer when nobody else starts it. In this
 case, however, the maintainer changed in late December -- Eric Sandeen took
 this position instead of David Chinner.
@@ -606,10 +605,10 @@ part of my thesis.
 
 The review of the second set revealed many disputable points and it become
 certain that these patches will need further changes. The second part of
-my changes is focused mostly on conflicts detection and allows for almost
+my changes is focused mostly on conflict detection and allows for almost
 all checks to be removed from the code as ad-hoc solutions, as the new
 structures and functions take care of them automatically. Any programmer
-making a change just has to correctly specify values in a {\tt struct
+making a change only must correctly specify values in a {\tt struct
 opt\_params}, write in a list of conflicting options, and the validation of
 the new option is guaranteed to work correctly and seamlessly.
 
@@ -630,7 +629,7 @@ Compare code examples \ref{lst:refactoring:aliasing} and
 seemingly unconnected variables in the code where the programmer does not know
 where exactly the pointer leads to. And even if he finds the first assignment,
 it is possible to mistakenly override the target address. In the second
-example, with setters and getters, it is apparent on the first glance, where
+example, with setters and getters, it is apparent at first glance, where
 the value is to be written or read. And it is impossible to mistakenly alter
 the target address. The disadvantage of using setters is that it is no longer possible to do in-situ increments/decrements (e.g. {\tt i++;}), however this is only a minor issue.
 
@@ -669,19 +668,19 @@ log writes.}, which is specified as a number of 512-byte blocks. However, it is
 later multiplied by the 512, at which moment it can get out of the valid bounds
 specified for input.
 
-Proposed but not yet implemented solution is to utilize the existing
+The proposed but not yet implemented solution is to utilize the existing
 infrastructure and create a new pseudo option for the table, which would not be
-visible for the end user, but would hold all the internal variables for which
-bound range (or any other condition, like being power of 2) can be applied.
+visible to the end user, but would hold all the internal variables for which
+the bound range (or any other condition, like being power of 2) can be applied.
 This topic was briefly discussed in replies to one of the patches in this
 set~\cite{secondSetSplitOtherVars}, because one of the other developers, Luis
 R. Rodriguez, has a work in progress that requires such infrastructure to be
 implemented.
 
-Because even this smaller set was not fully accepted even the end of April,
-and adressing the issues other developers raised required too much time, we
-furtherfocused on the next part of
-this work and did not used the second patchset in formal analysis.
+Because even this smaller set was not fully accepted by the end of April,
+and addressing the issues other developers raised required too much time, we
+further focused on the next part of
+this work and did not use the second patchset in formal analysis.
 
 Size of the smaller set can be seen in
 \Cref{lst:refactoring:firstSmallerGit}.
@@ -734,12 +733,12 @@ the found issues could not be fixed or changed before the deadline for this
 work. These changes will get merged eventually.
 
 The difficulties were analysed in an attempt to avoid these delays in the future.
-Our hypothesis is that the set as a whole was too big and complex, which effect
-was multiplied by unintentionally not adhering to unwritten standards. A
-proposed process change for further iterations is to send few smaller patches
-more often and wait with other changes depending on those submitted until they
-are accepted.
+Our hypothesis is that the set as a whole was too big and complex, an
+effect which was multiplied by unintentionally not adhering to unwritten
+standards. A proposed process change for further iterations is to send few
+smaller patches more often and wait with other changes depending on those
+submitted until they are accepted.
 
 The higher activity on the last patchset, which was just a subset of the second
-big set, seems to confirm this hypothesis, however, more iterations is needed.
+big set, seems to confirm this hypothesis, however, more iterations are needed.
 

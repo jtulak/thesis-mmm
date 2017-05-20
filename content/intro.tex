@@ -6,60 +6,70 @@
 %----------------------------------------------------------------------
 
 
-In projects with long life, even an initially clean code can become messy and complicated. Moreover when we speak about open-source projects where the original creators left yers ago and new people of various capabilities and knowledge continue the development.
+In software projects with long life, even an initially clean codebase can
+become messy and complicated. Moreso when we speak about open-source
+projects where the original creators left yers ago and new people of
+various capabilities and knowledge continue the development.
 
-In such a projects, new functionality is added to the existing code with
-minimal changes of the rest of the project. This may simplify the merging
+In such projects, new functionality is added to the existing code with
+minimal changes to the rest of the project. This may simplify the merging
 of these changes, as any responsible person can easily understand what the
-change does. But on the other side, in long term, it turns the code into
+change does. But on the other side, in the long term, it turns the code into
 a disordered chaos.
 
 The result is increasingly more difficult to maintain and test, and as a single functionality can be spread over many portions of the project, any change requires more and more attention and time.
 
-XFSprogs, a package of tools for XFS filesystem, is such a project. While
-the filesystem itself is getting some strict eye from the Linux kernel
-community nowdays, the tools like {\tt mkfs.xfs}\footnote{Formats a
-partition as XFS.}, {\tt fsck.xfs}\footnote{Checks and repairs errors in an
-existing XFS filesystem.} and others are not so publicly exposed and gets a
+xfsprogs, a package of tools for XFS filesystem, is such a project. While
+the filesystem itself is subject to careful scrutiny from the Linux kernel
+community, the tools like {\tt mkfs.xfs}\footnote{Formats a
+partition as XFS.}, {\tt fsck.xfs}\footnote{Usually checks and repairs errors in an
+existing filesystem. But for XFS it only tells the user what other
+tools to use.} and others are not so publicly exposed and get a
 lot less attention. From our experience with working on this project, it
-happens that only one or two persons other than the author of a patch read
+happens that only one or two persons other than the author of a patch may read
 it, and miss some subtle side effect the change has. Sometimes, the large
 set of tests XFS maintains captures this bug, sometimes it does not and it
 is noticed much later.
 
 On this point, it is important to highlight that despite the naming
 convention, each {\tt mkfs} tool is completely independent project and, for
-example, {\tt mkfs.xfs} and {\tt mkfs.ext4} does not share any code except
+example, {\tt mkfs.xfs} and {\tt mkfs.ext4} do not share any code except
 system libraries.
 
-Some parts of this code are more than 20 years old (see chapter 1 for more detailed history of XFS) and in the need of intensive cleaning. The tests suite (project xfstests) maintains hundreds of more or less complex tests, but these are limited in what they can detect as they usually work in this way: make a filesystem, then test that, so many errors in {\tt mkfs.xfs} are difficult to capture or notice. XFS also uses an automatic static analysis from Coverity, which is useful, but the project has no good data on the reliability of this analysis.
+Some parts of this code are more than 20 years old (see chapter 1 for a
+detailed history of XFS) and in need of intensive cleaning. The test
+suite (project xfstests) maintains hundreds of more or less complex tests,
+but these are limited in what they can detect as they usually work in this
+way: make a filesystem, then test that, so many errors in {\tt mkfs.xfs}
+are difficult to capture or notice. XFS also uses an automatic static
+analysis from Coverity, which is useful, but the project has no good data
+on the reliability of this analysis.
 
 With the approval of David Chinner, then the maintainer of XFS, we began the
-refactoring of mkfs.xfs, which was most in due. The goal of this work is to
+refactoring of mkfs.xfs, which was overdue. The goal of this work is to
 repay the technical debt accumulated over the years. That means not only
 fixing some long-known issues and cleaning particularly complex parts of
 the code, but also making structural changes to minimize the amount of code
-that has to be added or changed during the regular development (adding and
-removing features of the filesystem\ldots). Which should slow the build-up
+that must be added or changed during the regular development (adding and
+removing features of the filesystem). These changes should slow the build-up
 of the technical debt in the future.
 
-After implementing these changes, the code should be verify how effective
+After implementing these changes, this work should verify how effective
 the currently used tests and analysis are. Even if some testing and
 analysis methods can be used only on a part of the code, the results, when
 compared with other tools, still provides an estimate about the soundess
 and completeness of every used method.
 
-At the same time, this work can be also seen as a review of how well can
-various analysis and verification methods do on a real and in production
-used code.
+At the same time, this work can also be seen as a review of how well
+various analysis and verification methods perform on real and in-production
+code.
 
 The refactoring was done in two parts. One set of changes was merged into
 upstream in June 2016 (xfsprogs 4.7\footnote{The releasing of xfsprogs is
 		tightly coupled with releases of XFS kernel module, which
 		is part of Linux. Thus, xfsprogs uses the same version
-		number that the respective XFS kernel module and Linux has,
-because it is not expected to be generally used with any other version.}),
-the other set is, at the time of writing, still in the development. The
+		number that the respective XFS kernel module and Linux has.}),
+the other set is, at the time of writing, still in development. The
 versions of xfsprogs at different stages of this work were:
 \begin{itemize}
 \item Before the beginning of refactoring -- xfsprogs 4.6.
@@ -72,7 +82,7 @@ This work is structured as follows: First, information about XFS and
 mkfs.xfs are provided in the first chapter. In the following, third chapter, we look
 at the refactoring done and discuss the changes. After that, another
 chapter is dedicated to explaining formal analysis and verification,
-describing common techniques, and we points out notable tools, from which
+describing common techniques, and we point out notable tools, from which
 we select few to use in the fifth and sixth chapter, where the testing
 environment is described and results analysed.
 
