@@ -653,3 +653,12 @@ terms of correctness with respect to the language standard. Whether the code is
 well structured or not, or if it does what is expected from it on a higher
 level, is not possible to assess with these tools.
 
+Our patches reduced the number of issues found by all tools except
+Coverity. Coverity saw a small growth on higher levels of
+aggressiveness\footnote{On the low level, Coverity found no defect both
+before and after the patches.}. On the other hand, GCC, Clang and CppCheck
+saw a fall to roughly about one quarter. Codacy, after subtracting false
+positives, shows the same trend, although the only tool from the tested
+ones, which was used during the development of these patches, is the online
+Coverity service.
+
