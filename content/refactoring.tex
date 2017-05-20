@@ -15,7 +15,7 @@ variables duplication as much as possible.
 
 During development, we had to repeatedly solve conflicts with changes
 from other developers that got merged into xfsprogs while we were still
-working on my changes. That led me to cut the work into multiple parts.
+working on our changes. That led me to cut the work into multiple parts.
 That way, others could benefit from changes that were already done and we
 would not have to maintain so many patches at any given time. There are two
 main patchsets which are accompanied by several small and enclosed changes that
@@ -396,16 +396,17 @@ The meaning of the specific fields is this:
 \end{description}
 
 
-The {\tt subopt\_param} has the following members:
+The {\tt subopt\_param} has the following members. The displayed
+descriptions are part of the code:
 \begin{description}
 \item[index] {\em MANDATORY}
-    This number, starting from zero, denotes which item in subopt\_params
+	This number, starting from zero, denotes which item in {\tt subopt\_params}
     it is. The index must be the same as is the order in subopts list,
-    so we can access the right item both in subopt\_params and subopts.
+    so we can access the right item both in {\tt subopt\_params} and subopts.
 
 \item[seen] {\em INTERNAL}
-    Do not set this flag when defining a subopt. It is used to remember that
-    this subopt was already seen, for example for conflicts detection.
+	Do not set this flag when defining a {\tt subopt}. It is used to remember that
+	this {\tt subopt} was already seen, for example for conflicts detection.
 
 \item[str\_seen] {\em INTERNAL}
     Do not set. It is used internally for respecification, when some options
@@ -417,32 +418,33 @@ The {\tt subopt\_param} has the following members:
     set it to true.
 
 \item[is\_power\_2] {\em OPTIONAL}
-    An optional flag for subopts where the given value must be a power
+	An optional flag for {\tt subopts} where the given value must be a power
     of two.
 
 \item[conflicts] {\em MANDATORY}
     If your subopt is in a conflict with some other option, specify it.
     Accepts the .index values of the conflicting subopts and the last
-    member of this list must be LAST\_CONFLICT.
+    member of this list must be {\tt LAST\_CONFLICT}.
 
 \item[minval, maxval] {\em OPTIONAL}
     These options are used for automatic range checking and they have to be
     always used together in a pair. If you do not want to limit the max value,
-    use something like UINT\_MAX. If no value is given, then you must either
-    supply your own validation, or refuse any value in the 'case
-    X\_SOMETHING' block. If you forget to define the min and max value, but
+    use something like {\tt UINT\_MAX}. If no value is given, then you must either
+    supply your own validation, or refuse any value in the '{\tt case
+    X\_SOMETHING}' block. If you forget to define the min and max value, but
     call a standard function for validating user's value, it will cause an
     error message notifying you about this issue.
 
-    (Said in another way, you can not have minval and maxval both equal
-    to zero. But if one value is different: minval=0 and maxval=1,
+    (Said in another way, you can not have {\tt minval} and {\tt maxval} both equal
+	    to zero. But if one value is different: {\tt minval=0} and {\tt
+	    maxval=1},
     then it is OK.)
 
 \item[defaultval] {\em MANDATORY}
     The value used if user specifies the subopt, but no value.
-    If the subopt accepts some values (-d file=[1|0]), then this
+    If the subopt accepts some values ({\tt -d file=[1|0]}), then this
     sets what is used with simple specifying the subopt (-d file).
-    A special SUBOPT\_NEEDS\_VAL can be used to require a user-given
+    A special {\tt SUBOPT\_NEEDS\_VAL} can be used to require a user-given
     value in any case.
 
     It was later revealed that the name of this field is confusing and can
@@ -598,14 +600,14 @@ Jan Tulak (22):
 
 \end{lstlisting}
 
-Together, these two issues caused that despite my urging, there was not much
+Together, these two issues caused that despite our urging, there was not much
 reaction until March. In March we submitted another version, this time
 intentionally not as an RFC. We also mentioned to few people that this is
-part of my thesis.
+part of our thesis.
 
 The review of the second set revealed many disputable points and it become
 certain that these patches will need further changes. The second part of
-my changes is focused mostly on conflict detection and allows for almost
+our changes is focused mostly on conflict detection and allows for almost
 all checks to be removed from the code as ad-hoc solutions, as the new
 structures and functions take care of them automatically. Any programmer
 making a change only must correctly specify values in a {\tt struct
@@ -621,7 +623,7 @@ Most notable changes are functions {\tt parse|get|set\_conf\_val}
 -- a set of functions to manipulate the user input values. This is a key
 difference from the RFC. There the values were manipulated as pointers to the
 table, but other developers raised objections. Most notably Dave Chinner, who
-rebutted my worries about the use of setters and getters in a reply to my
+rebutted our worries about the use of setters and getters in a reply to our
 e-mail where we suggested them as another option~\cite{unifyTypes1, unifyTypes2}
 
 Compare code examples \ref{lst:refactoring:aliasing} and
@@ -718,7 +720,9 @@ Jan Tulak (12):
 	\item {\em August 2016} -- First draft of changes of the second set~\cite{secondSetPreRFC}.
 	\item {\em December 2016} -- RFC of the full second set. This gained just a little attention.
 	\item {\em March 2017} -- Second set without the RFC. This version attracted enough attention to be useful, and provided valuable feedback.
-	\item {\em March 2017} -- Vault conference in Boston. We met some other developers personally and debated some of the changes. This helped to raise some attention towards my patches.
+	\item {\em March 2017} -- Vault conference in Boston. We met some
+		other developers personally and debated some of the
+		changes. This helped to raise some attention towards our patches.
 	\item {\em April 2017} -- resubmitting only part of the second set with requested changes and setters/getters as an addition. This generated a lot of feedback.
 \end{itemize}
 
