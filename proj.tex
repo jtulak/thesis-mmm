@@ -44,11 +44,6 @@
 % problém je, že balíček hyperref musí být uveden jako poslední, takže nemůže
 % být v šabloně
 
-\ifx\pdfoutput\undefined % nejedeme pod pdflatexem
-	\usepackage[dvips]{color, graphicx}
-	\usepackage[tex4ht]{hyperref}
-	\usepackage{cleveref}
-\else
   \ifNotPrint
     \usepackage{color}
     \usepackage[unicode,colorlinks,hyperindex,plainpages=false,pdftex]{hyperref}
@@ -65,8 +60,16 @@
     \def\LinkColor{links}
     \def\pdfBorderAttrs{/Border [0 0 0] }  % bez okrajů kolem odkazů
     \pdfcompresslevel=9
+  \else
+    \usepackage[unicode,hyperindex,plainpages=false,pdftex]{hyperref}
+    \usepackage{cleveref}
+    \definecolor{links}{rgb}{0,0,0}
+    \definecolor{anchors}{rgb}{0,0,0}
+    \def\AnchorColor{anchors}
+    \def\LinkColor{links}
+    \def\pdfBorderAttrs{/Border [0 0 0] }  % bez okrajů kolem odkazů
+    %\pdfcompresslevel=9
   \fi
-\fi
 
 %Informace o praci/projektu
 %---------------------------------------------------------------------------
