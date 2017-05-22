@@ -1,2 +1,24 @@
 \chapter*{Appendices}
-foo
+The attached optical medium has this content:
+\begin{itemize}
+\item {\tt docker/} -- The directory with the containers and used scripts.
+\item {\tt tex/} -- Latex source code, and data used in this work in {\tt
+	results} subdirectory.
+\item {\tt xfsprogs-dev/} -- The directory with xfsprogs git repository.
+Includes also the changes that were not yet merged in {\tt conflicts}
+branch.
+\end{itemize}
+
+The {\tt docker/} directory contains subdirectories for every
+container, plus these scripts, which are described in \Cref{chap:techniques}:
+\begin{itemize}
+\item {\tt prepare.sh} -- A script that will download sources for the docker
+containers. Not necessary when the directories already exists.
+\item {\tt tests.py} -- A script that runs all the tests.
+\item {\tt format-outputs.sh} -- A script to preprocess the output of the used
+tools for later analysis.
+\item {\tt parse.py} -- A simple analysis of the outputs, capable of
+printing differences between revisions.
+\item {\tt README.md} -- An example of how to use these scripts.
+\end{itemize}
+
