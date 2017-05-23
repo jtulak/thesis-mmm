@@ -87,6 +87,7 @@
 \else % je to pdftex !
   \usepackage[pdftex]{graphicx}
 \fi
+\usepackage{pdfpages}
 
 %-----------------------------------------------------------------------------
 % colors
