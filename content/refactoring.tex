@@ -221,9 +221,6 @@ Any new option required a careful reading through the existing code and
 possibly the placement new checks in multiple places. Thus it was difficult to know
 when any value is checked and safe for use in further computations.
 
-HERE
-
-
 The consequence of these issues is that {\tt mkfs.xfs} did a bad job of
 validating user input from the command line. Even if an issue was detected
 and the specific error fixed, the minimal code reuse meant that other
